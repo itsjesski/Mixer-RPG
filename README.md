@@ -6,12 +6,11 @@ Getting Started: <br>
 2. Download this RPG onto your desktop.<br>
 3. Go into beam-rpg/db/settings.json <br>
 4. Put in your scottybot auth code from the scottybot GUI, and edit any other settings you see fit here. <br>
-5. Time to create the scottybot commands we'll need! <br>
+5. Time to create the scottybot commands we'll need! Look below for the commands you'll need create in the Scottybot GUI.<br>
 6. Run node.js and direct it to wherever you've stored the beam RPG folder. <br>
 7. Type "node beam-rpg" to start up the service.
 
 Scotty Commands: <br>
-  - Open up the ScottyGUI and create the following commands:
   - !rpg : (_null_)
   - !rpg-adventure : (_null_) : Recommended cost of 200.
   - !rpg-daily : (_null_)(_bpcd_)

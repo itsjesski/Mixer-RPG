@@ -1,0 +1,1564 @@
+{
+	"weaponTypeOne": [
+		{
+			"name": "Giant",
+			"strength": 7,
+			"guile": 1,
+			"magic": 2
+		},
+		{
+			"name": "Massive",
+			"strength": 8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Tiny",
+			"strength": 1,
+			"guile": 8,
+			"magic": 1
+		},
+		{
+			"name": "Pristine",
+			"strength": 2,
+			"guile": 2,
+			"magic": 6
+		},
+		{
+			"name": "Small",
+			"strength": 2,
+			"guile": 7,
+			"magic": 1
+		},
+		{
+			"name": "Average",
+			"strength": 4,
+			"guile": 3,
+			"magic": 3
+		},
+		{
+			"name": "Mastercraft",
+			"strength": 3,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Mystic",
+			"strength": 3,
+			"guile": 3,
+			"magic": 4
+		},
+		{
+			"name": "Ancient",
+			"strength": 1,
+			"guile": 3,
+			"magic": 6
+		},
+		{
+			"name": "Aged",
+			"strength": 2,
+			"guile": 3,
+			"magic": 5
+		},
+		{
+			"name": "Rusted",
+			"strength": 2,
+			"guile": 2,
+			"magic": 2
+		},
+		{
+			"name": "Broken",
+			"strength": 1,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Ultra",
+			"strength": 7,
+			"guile": 2,
+			"magic": 1
+		},
+		{
+			"name": "Weird",
+			"strength": 1,
+			"guile": 7,
+			"magic": 2
+		},
+		{
+			"name": "Evil",
+			"strength": 1,
+			"guile": 5,
+			"magic": 4
+		},
+		{
+			"name": "Good",
+			"strength": 4,
+			"guile": 1,
+			"magic": 5
+		},
+		{
+			"name": "Barbed",
+			"strength": 1,
+			"guile": 8,
+			"magic": 1
+		},
+		{
+			"name": "Twisted",
+			"strength": 1,
+			"guile": 1,
+			"magic": 8
+		},
+		{
+			"name": "Normal",
+			"strength": 4,
+			"guile": 3,
+			"magic": 3
+		},
+		{
+			"name": "Pristine",
+			"strength": 3,
+			"guile": 3,
+			"magic": 4
+		}
+	],
+	"weaponTypeTwo":[
+		{
+			"name": "Flaming",
+			"strength": 2,
+			"guile": 2,
+			"magic": 6
+		},
+		{
+			"name": "Ice",
+			"strength": 2,
+			"guile": 2,
+			"magic": 6
+		},
+		{
+			"name": "Poison",
+			"strength": 2,
+			"guile": 6,
+			"magic": 2
+		},
+		{
+			"name": "Water",
+			"strength": 1,
+			"guile": 2,
+			"magic": 7
+		},
+		{
+			"name": "Fire",
+			"strength": 1,
+			"guile": 2,
+			"magic": 7
+		},
+		{
+			"name": "Grass",
+			"strength": 1,
+			"guile": 7,
+			"magic": 2
+		},
+		{
+			"name": "Sand",
+			"strength": 1,
+			"guile": 7,
+			"magic": 2
+		},
+		{
+			"name": "Steel",
+			"strength": 7,
+			"guile": 2,
+			"magic": 1
+		},
+		{
+			"name": "Iron",
+			"strength": 6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Obsidian",
+			"strength": 8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Unidentified",
+			"strength": 1,
+			"guile": 1,
+			"magic": 8
+		},
+		{
+			"name": "Red",
+			"strength": 2,
+			"guile": 4,
+			"magic": 4
+		},
+		{
+			"name": "Bloody",
+			"strength": 1,
+			"guile": 8,
+			"magic": 1
+		},
+		{
+			"name": "Blue",
+			"strength": 2,
+			"guile": 4,
+			"magic": 4
+		},
+		{
+			"name": "Green",
+			"strength": 2,
+			"guile": 4,
+			"magic": 4
+		},
+		
+		{
+			"name": "Shimmering",
+			"strength": 1,
+			"guile": 2,
+			"magic": 7
+		},
+		{
+			"name": "Glowing",
+			"strength": 1,
+			"guile": 2,
+			"magic": 7
+		},
+		{
+			"name": "Singing",
+			"strength": 1,
+			"guile": 5,
+			"magic": 4
+		},
+		{
+			"name": "Glass",
+			"strength": 1,
+			"guile": 6,
+			"magic": 3
+		},
+		{
+			"name": "Stone",
+			"strength": 8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Diamond",
+			"strength": 7,
+			"guile": 1,
+			"magic": 2
+		}
+	],
+	"meleeWeapon":[
+		{
+			"name": "Longsword",
+			"strength": 4,
+			"guile": 3,
+			"magic": 3
+		},
+		{
+			"name": "Rapier",
+			"strength": 3,
+			"guile": 5,
+			"magic": 2
+		},
+		{
+			"name": "Falchion",
+			"strength": 6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Mace",
+			"strength": 7,
+			"guile": 2,
+			"magic": 1
+		},
+		{
+			"name": "Club",
+			"strength": 6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Greatsword",
+			"strength": 8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Flail",
+			"strength": 6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Dagger",
+			"strength": 1,
+			"guile": 8,
+			"magic": 1
+		},
+		{
+			"name": "Halberd",
+			"strength": 7,
+			"guile": 2,
+			"magic": 1
+		},
+		{
+			"name": "Spear", 
+			"strength": 3,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Shortsword", 
+ 			"strength": 4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Katana", 
+ 			"strength": 3,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Axe", 
+			"strength": 6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Claw", 
+			"strength": 2,
+			"guile": 7,
+			"magic": 1
+		},
+		{
+			"name": "Hammer", 
+			"strength": 8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Pickaxe", 
+			"strength": 7,
+			"guile": 2,
+			"magic": 1
+		},
+		{
+			"name": "Shovel", 
+			"strength": 5,
+			"guile": 4,
+			"magic": 1
+		},
+		{
+			"name": "Staff", 
+			"strength": 1,
+			"guile": 1,
+			"magic": 8
+		},
+		{
+			"name": "Zweihander", 
+			"strength": 8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Chakram", 
+			"strength": 1,
+			"guile": 8,
+			"magic": 1
+		},
+		{
+			"name": "Trident", 
+			"strength": 4,
+			"guile": 5,
+			"magic": 1
+		},
+		{
+			"name": "Whip", 
+			"strength": 3,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Lance", 
+			"strength": 8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Scythe", 
+			"strength": 3,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Maul", 
+			"strength": 8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Sabre", 
+			"strength": 3,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Claymore", 
+			"strength": 8,
+			"guile": 1,
+			"magic": 1
+		}
+	],
+	"rangedWeapon":[
+		{
+			"name": "Bow", 
+			"strength": 3,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Crossbow", 
+			"strength": 6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Shotgun", 
+			"strength": 6,
+			"guile": 1,
+			"magic": 3
+		},
+		{
+			"name": "Pistol", 
+			"strength": 5,
+			"guile": 2,
+			"magic": 3
+		},
+		{
+			"name": "Cannon", 
+			"strength": 8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Longbow", 
+			"strength": 6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Blowgun", 
+			"strength": 1,
+			"guile": 5,
+			"magic": 4
+		},
+		{
+			"name": "Sling", 
+			"strength": 1,
+			"guile": 6,
+			"magic": 3
+		},
+		{
+			"name": "Javelin", 
+			"strength": 7,
+			"guile": 2,
+			"magic": 1
+		},
+		{
+			"name": "Rock", 
+			"strength": 3,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Arbalest", 
+			"strength": 7,
+			"guile": 2,
+			"magic": 1
+		},
+		{
+			"name": "Musket", 
+			"strength": 7,
+			"guile": 1,
+			"magic": 2
+		},
+		{
+			"name": "Shuriken", 
+			"strength": 1,
+			"guile": 8,
+			"magic": 1
+		},
+		{
+			"name": "Ballista", 
+			"strength": 8,
+			"guile": 1,
+			"magic": 1
+		}
+	],
+	"magicType":[
+		{
+			"name": "Chaotic", 
+			"strength": 2,
+			"guile": 4,
+			"magic": 4
+		},
+		{
+			"name": "Attuned", 
+			"strength": 3,
+			"guile": 1,
+			"magic": 6
+		},
+		{
+			"name": "Controlled", 
+			"strength": 3,
+			"guile": 3,
+			"magic": 4
+		},
+		{
+			"name": "Uncontrollable", 
+			"strength": 4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Good", 
+			"strength": 6,
+			"guile": 1,
+			"magic": 3
+		},
+		{
+			"name": "Bad", 
+			"strength": 6,
+			"guile": 1,
+			"magic": 3
+		},
+		{
+			"name": "Huge", 
+			"strength": 8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Tiny", 
+			"strength": 1,
+			"guile": 8,
+			"magic": 1
+		},
+		{
+			"name": "Blue", 
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Green", 
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Red", 
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Dangerous", 
+			"strength":2,
+			"guile": 1,
+			"magic": 7
+		}
+	],
+	"elements":[
+		{
+			"name": "Fire", 
+			"strength":5,
+			"guile": 2,
+			"magic": 3
+		},
+		{
+			"name": "Ice", 
+			"strength":5,
+			"guile": 2,
+			"magic": 3
+		},
+		{
+			"name": "Wind", 
+			"strength":3,
+			"guile": 5,
+			"magic": 2
+		},
+		{
+			"name": "Water", 
+			"strength":3,
+			"guile": 5,
+			"magic": 2
+		},
+		{
+			"name": "Dream", 
+			"strength":1,
+			"guile": 2,
+			"magic": 7
+		},
+		{
+			"name": "Life", 
+			"strength":1,
+			"guile": 2,
+			"magic": 7
+		},
+		{
+			"name": "Death", 
+			"strength":6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Healing", 
+			"strength":3,
+			"guile": 1,
+			"magic": 6
+		},
+		{
+			"name": "Pain", 
+			"strength":2,
+			"guile": 1,
+			"magic": 7
+		},
+		{
+			"name": "Levatating", 
+			"strength":1,
+			"guile": 7,
+			"magic": 2
+		},
+		{
+			"name": "Sparkling", 
+			"strength":4,
+			"guile": 2,
+			"magic": 4
+		},
+		{
+			"name": "Star", 
+			"strength":1,
+			"guile": 1,
+			"magic": 8
+		},
+		{
+			"name": "Moon", 
+			"strength":1,
+			"guile": 1,
+			"magic": 8
+		},
+		{
+			"name": "Sun", 
+			"strength":1,
+			"guile": 1,
+			"magic": 8
+		}
+	],
+	"magicSpell":[
+		{
+			"name": "Ball", 
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Geyser", 
+			"strength":2,
+			"guile": 4,
+			"magic": 4
+		},
+		{
+			"name": "Wall", 
+			"strength":1,
+			"guile": 7,
+			"magic": 3
+		},
+		{
+			"name": "Orb", 
+			"strength":4,
+			"guile": 1,
+			"magic": 5
+		},
+		{
+			"name": "Beam", 
+			"strength":7,
+			"guile": 1,
+			"magic": 2
+		},
+		{
+			"name": "Wave", 
+			"strength":4,
+			"guile": 3,
+			"magic": 3
+		},
+		{
+			"name": "Touch", 
+			"strength":1,
+			"guile": 5,
+			"magic": 4
+		},
+		{
+			"name": "Arc", 
+			"strength":1,
+			"guile": 5,
+			"magic": 4
+		},
+		{
+			"name": "Spit", 
+			"strength":1,
+			"guile": 7,
+			"magic": 2
+		},
+		{
+			"name": "Shot", 
+			"strength":7,
+			"guile": 2,
+			"magic": 1
+		},
+		{
+			"name": "Prison", 
+			"strength":1,
+			"guile": 6,
+			"magic": 3
+		},
+		{
+			"name": "Barrage", 
+			"strength":1,
+			"guile": 3,
+			"magic": 6
+		},
+		{
+			"name": "Blast", 
+			"strength":6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Bolt", 
+			"strength":4,
+			"guile": 3,
+			"magic": 3
+		},
+		{
+			"name": "Explosion", 
+			"strength":5,
+			"guile": 1,
+			"magic": 4
+		},
+		{
+			"name": "Missile", 
+			"strength":4,
+			"guile": 2,
+			"magic": 4
+		},
+		{
+			"name": "Shock", 
+			"strength":2,
+			"guile": 4,
+			"magic": 4
+		},
+		{
+			"name": "Volley", 
+			"strength":1,
+			"guile": 4,
+			"magic": 5
+		},
+		{
+			"name": "Breath", 
+			"strength":1,
+			"guile": 7,
+			"magic": 2
+		},
+		{
+			"name": "Strike", 
+			"strength":7,
+			"guile": 1,
+			"magic": 2
+		}
+	],
+	"resourceType":[
+		{
+			"name": "Iron", 
+			"strength":5,
+			"guile": 3,
+			"magic": 2
+		},
+		{
+			"name": "Metal", 
+			"strength":5,
+			"guile": 3,
+			"magic": 2
+		},
+		{
+			"name": "Steel", 
+			"strength":6,
+			"guile": 2,
+			"magic": 2
+		},
+		{
+			"name": "Chaos", 
+			"strength":2,
+			"guile": 2,
+			"magic": 6
+		},
+		{
+			"name": "Order", 
+			"strength":2,
+			"guile": 2,
+			"magic": 6
+		},
+		{
+			"name": "Wooden", 
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Fire", 
+			"strength":2,
+			"guile": 1,
+			"magic": 7
+		},
+		{
+			"name": "Water", 
+			"strength":1,
+			"guile": 2,
+			"magic": 7
+		},
+		{
+			"name": "Wind", 
+			"strength":1,
+			"guile": 3,
+			"magic": 6
+		},
+		{
+			"name": "Earth", 
+			"strength":3,
+			"guile": 1,
+			"magic": 6
+		},
+		{
+			"name": "Chain", 
+			"strength":5,
+			"guile": 3,
+			"magic": 2
+		},
+		{
+			"name": "Leather", 
+			"strength":4,
+			"guile": 5,
+			"magic": 1
+		},
+		{
+			"name": "Paper", 
+			"strength":1,
+			"guile": 3,
+			"magic": 3
+		},
+		{
+			"name": "Cloth", 
+			"strength":1,
+			"guile": 6,
+			"magic": 3
+		},
+		{
+			"name": "Air", 
+			"strength":1,
+			"guile": 6,
+			"magic": 3
+		},
+		{
+			"name": "Obsidian", 
+			"strength":8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Diamond", 
+			"strength":7,
+			"guile": 1,
+			"magic": 2
+		}
+	],
+	"armor":[
+		{
+			"name": "Shield", 
+			"strength":3,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Armor", 
+			"strength":6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Spellshield", 
+			"strength":1,
+			"guile": 3,
+			"magic": 6
+		}
+	],
+	"creatureAttribute":[
+		{
+			"name": "Flying", 
+			"strength":1,
+			"guile": 5,
+			"magic": 4
+		},
+		{
+			"name": "Mystic", 
+			"strength":1,
+			"guile": 4,
+			"magic": 5
+		},
+		{
+			"name": "Galloping", 
+			"strength":5,
+			"guile": 4,
+			"magic": 1
+		},
+		{
+			"name": "Slow", 
+			"strength":1,
+			"guile": 6,
+			"magic": 3
+		},
+		{
+			"name": "Fast", 
+			"strength":1,
+			"guile": 6,
+			"magic": 3
+		},
+		{
+			"name": "Patient", 
+			"strength":1,
+			"guile": 6,
+			"magic": 3
+		},
+		{
+			"name": "Crazy", 
+			"strength":6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Insane", 
+			"strength":6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Blue", 
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Green", 
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Red", 
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Metal", 
+			"strength":7,
+			"guile": 1,
+			"magic": 2
+		},
+		{
+			"name": "Soft", 
+			"strength":2,
+			"guile": 6,
+			"magic": 2
+		},
+		{
+			"name": "Smart", 
+			"strength":1,
+			"guile": 8,
+			"magic": 1
+		},
+		{
+			"name": "Dumb", 
+			"strength":7,
+			"guile": 1,
+			"magic": 2
+		},
+		{
+			"name": "Talking", 
+			"strength":1,
+			"guile": 3,
+			"magic": 6
+		},
+		{
+			"name": "Weird", 
+			"strength":1,
+			"guile": 6,
+			"magic": 3
+		},
+		{
+			"name": "Ancient", 
+			"strength":1,
+			"guile": 2,
+			"magic": 7
+		},
+		{
+			"name": "Aged", 
+			"strength":2,
+			"guile": 1,
+			"magic": 7
+		},
+		{
+			"name": "Mean", 
+			"strength":3,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Wind", 
+			"strength":3,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Friendly", 
+			"strength":3,
+			"guile": 3,
+			"magic": 4
+		},
+		{
+			"name": "Mad", 
+			"strength":4,
+			"guile": 3,
+			"magic": 3
+		},
+		{
+			"name": "Happy", 
+			"strength":4,
+			"guile": 3,
+			"magic": 3
+		}
+	],
+	"creatureName":[
+		{
+			"name": "Dragon", 
+			"strength":6,
+			"guile": 2,
+			"magic": 2
+		},
+		{
+			"name": "Horse", 
+			"strength":4,
+			"guile": 3,
+			"magic": 3
+		},
+		{
+			"name": "Donkey", 
+			"strength":4,
+			"guile": 3,
+			"magic": 3
+		},
+		{
+			"name": "Turtle", 
+			"strength":3,
+			"guile": 3,
+			"magic": 4
+		},
+		{
+			"name": "Bird", 
+			"strength":3,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Elemental", 
+			"strength":1,
+			"guile": 3,
+			"magic": 6
+		},
+		{
+			"name": "Giant", 
+			"strength":8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Wolf", 
+			"strength":3,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Bear", 
+			"strength":6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Moose", 
+			"strength":6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Chicken", 
+			"strength":1,
+			"guile": 3,
+			"magic": 4
+		},
+		{
+			"name": "Lion", 
+			"strength":5,
+			"guile": 3,
+			"magic": 2
+		},
+		{
+			"name": "Llama", 
+			"strength":3,
+			"guile": 5,
+			"magic": 2
+		},
+		{
+			"name": "Panda", 
+			"strength":6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Sloth", 
+			"strength":3,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Ogre", 
+			"strength":7,
+			"guile": 2,
+			"magic": 1
+		}
+	],
+	"titleType":[
+		{
+			"name": "Master", 
+			"strength":4,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Journeyman", 
+			"strength":3,
+			"guile": 5,
+			"magic": 2
+		},
+		{
+			"name": "Apprentice", 
+			"strength":2,
+			"guile": 3,
+			"magic": 5
+		},
+		{
+			"name": "Beginner", 
+			"strength":3,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Wise", 
+			"strength":1,
+			"guile": 1,
+			"magic": 8
+		},
+		{
+			"name": "Rich", 
+			"strength":1,
+			"guile": 8,
+			"magic": 1
+		},
+		{
+			"name": "Poor", 
+			"strength":3,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Aged", 
+			"strength":1,
+			"guile": 1,
+			"magic": 8
+		},
+		{
+			"name": "Young", 
+			"strength":5,
+			"guile": 3,
+			"magic": 2
+		},
+		{
+			"name": "Supreme", 
+			"strength":2,
+			"guile": 3,
+			"magic": 5
+		},
+		{
+			"name": "Undead", 
+			"strength":1,
+			"guile": 3,
+			"magic": 6
+		},
+		{
+			"name": "Elf", 
+			"strength":2,
+			"guile": 6,
+			"magic": 2
+		},
+		{
+			"name": "Dwarf", 
+			"strength":7,
+			"guile": 2,
+			"magic": 1
+		},
+		{
+			"name": "Elemental", 
+			"strength":2,
+			"guile": 1,
+			"magic": 7
+		},
+		{
+			"name": "Vampire", 
+			"strength":3,
+			"guile": 2,
+			"magic": 5
+		},
+		{
+			"name": "Zombie", 
+			"strength":5,
+			"guile": 1,
+			"magic": 4
+		}
+	],
+	"title":[
+		{
+			"name": "Craftsman", 
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Swordfighter", 
+			"strength":3,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Mercenary", 
+			"strength":2,
+			"guile": 6,
+			"magic": 2
+		},
+		{
+			"name": "Wizard", 
+			"strength":1,
+			"guile": 1,
+			"magic": 8
+		},
+		{
+			"name": "Mage", 
+			"strength":1,
+			"guile": 2,
+			"magic": 7
+		},
+		{
+			"name": "Pirate", 
+			"strength":2,
+			"guile": 7,
+			"magic": 1
+		},
+		{
+			"name": "Beggar", 
+			"strength":3,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Artist", 
+			"strength":1,
+			"guile": 4,
+			"magic": 5
+		},
+		{
+			"name": "Musician", 
+			"strength":1,
+			"guile": 5,
+			"magic": 4
+		},
+		{
+			"name": "Cook", 
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Champion", 
+			"strength":7,
+			"guile": 2,
+			"magic": 1
+		},
+		{
+			"name": "Falconer", 
+			"strength":2,
+			"guile": 7,
+			"magic": 1
+		},
+		{
+			"name": "Houndmaster", 
+			"strength":3,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Messenger", 
+			"strength":4,
+			"guile": 5,
+			"magic": 1
+		},
+		{
+			"name": "Cobbler", 
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Adventurer", 
+			"strength":4,
+			"guile": 3,
+			"magic": 3
+		},
+		{
+			"name": "Quester", 
+			"strength":3,
+			"guile": 3,
+			"magic": 4
+		},
+		{
+			"name": "Knight", 
+			"strength":6,
+			"guile": 1,
+			"magic": 3
+		},
+		{
+			"name": "Duke", 
+			"strength":2,
+			"guile": 7,
+			"magic": 1
+		},
+		{
+			"name": "Duelist", 
+			"strength":1,
+			"guile": 8,
+			"magic": 1
+		},
+		{
+			"name": "Librarian", 
+			"strength":1,
+			"guile": 3,
+			"magic": 6
+		},
+		{
+			"name": "Master of Coin", 
+			"strength":2,
+			"guile": 7,
+			"magic": 1
+		},
+		{
+			"name": "Crusader", 
+			"strength":3,
+			"guile": 1,
+			"magic": 6
+		}
+	],
+	"companion":[
+		{
+			"name": "Elf", 
+			"strength":2,
+			"guile": 5,
+			"magic": 3
+		},
+		{
+			"name": "Dog", 
+			"strength":5,
+			"guile": 4,
+			"magic": 1
+		},
+		{
+			"name": "Wolf", 
+			"strength":6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Cat", 
+			"strength":3,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Kitten", 
+			"strength":2,
+			"guile": 3,
+			"magic": 5
+		},
+		{
+			"name": "Horse", 
+			"strength":6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Human", 
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Dwarf", 
+			"strength":6,
+			"guile": 2,
+			"magic": 2
+		},
+		{
+			"name": "Bird", 
+			"strength":2,
+			"guile": 3,
+			"magic": 5
+		},
+		{
+			"name": "Pig", 
+			"strength":3,
+			"guile": 5,
+			"magic": 2
+		},
+		{
+			"name": "Cow", 
+			"strength":6,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Ogre", 
+			"strength":8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Giant", 
+			"strength":8,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Dragon", 
+			"strength":7,
+			"guile": 1,
+			"magic": 2
+		},
+		{
+			"name": "Drake", 
+			"strength":6,
+			"guile": 1,
+			"magic": 3
+		},
+		{
+			"name": "Pony", 
+			"strength":4,
+			"guile": 6,
+			"magic": 1
+		},
+		{
+			"name": "Lizard", 
+			"strength":1,
+			"guile": 3,
+			"magic": 6
+		},
+		{
+			"name": "Chicken", 
+			"strength":2,
+			"guile": 3,
+			"magic": 5
+		},
+		{
+			"name": "Sloth", 
+			"strength":5,
+			"guile": 3,
+			"magic": 2
+		},
+		{
+			"name": "Bunny", 
+			"strength":1,
+			"guile": 3,
+			"magic": 6
+		},
+		{
+			"name": "Rabbit", 
+			"strength":1,
+			"guile": 4,
+			"magic": 5
+		},
+		{
+			"name": "Mouse", 
+			"strength":1,
+			"guile": 2,
+			"magic": 7
+		},
+		{
+			"name": "Hamster", 
+			"strength":1,
+			"guile": 3,
+			"magic": 6
+		}
+	],
+	"trophy" :[
+		{
+			"name": "Ear",
+			"strength":1,
+			"guile": 5,
+			"magic": 5
+		},
+		{
+			"name": "Knife",
+			"strength":5,
+			"guile": 5,
+			"magic": 1
+		},
+		{
+			"name": "Hat",
+			"strength":1,
+			"guile": 5,
+			"magic": 5
+		},
+		{
+			"name": "Gloves",
+			"strength":5,
+			"guile": 1,
+			"magic": 5
+		},
+		{
+			"name": "Training",
+			"strength":4,
+			"guile": 4,
+			"magic": 3
+		}
+	],
+	"currency": [100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400]
+}

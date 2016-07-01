@@ -1,0 +1,15 @@
+{
+	"duel": {
+		"settings" :{
+			"inProgress": false,
+			"amount": "0",
+			"expireTime": 0
+		},
+		"playerOne": {
+			"name": ""
+		},
+		"playerTwo": {
+			"name": ""
+		}
+    }
+}

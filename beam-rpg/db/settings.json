@@ -1,0 +1,15 @@
+{
+	"scottyauth": "Scottyboth Auth Code Here",
+	"cmdCooldownTime": 60000,
+	"dailyReward": 50,
+	"dueling": {
+		"active": true,
+		"minBet": 50
+	},
+	"raid":{
+		"timer": 60000,
+		"winReward": 50,
+		"loseReward": 25,
+		"raidMessage": "Your raid message goes here."
+	}
+}

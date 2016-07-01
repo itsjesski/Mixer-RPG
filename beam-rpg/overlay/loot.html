@@ -1,0 +1,42 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+		<link href="css/main.css" rel='stylesheet' type='text/css'>
+    </head>
+    <body>
+
+        <div class="wrapper">
+            <div class="looter" style="display:none;">
+                <div class="loot-img regular" style="display:none;"><img src="./images/chest-open.gif"></div>
+                <div class="loot-img mimic" style="display:none;"><img src="./images/mimic.gif"></div>
+                <div class="loot-img raidtarget" style="display:none;"><img src=""></div>
+                <div class="loot-name clear"></div>
+                <div class="loot-reward clear"></div>
+                <div class="loot-reward-name clear"></div>
+                <div class="loot-reward-stats clear"></div>
+            </div>
+		</div>
+
+        <div class="audio-wrap">
+            <audio controls id="chestAudio" class="chest-sound">
+              <source src="sound/chest.ogg" type="audio/ogg" volume=".2">
+            </audio>
+            <audio controls id="coinAudio" class="coin-sound">
+              <source src="sound/coin.ogg" type="audio/ogg" volume=".2">
+            </audio>
+            <audio controls id="monsterAudio" class="monster-sound">
+              <source src="sound/monster.ogg" type="audio/ogg" volume=".2">
+            </audio>
+        </div>
+
+    </body>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="js/reconnecting-websocket.js"></script>
+	<script src="js/main.js"></script>
+</html> 

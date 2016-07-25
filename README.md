@@ -5,10 +5,18 @@ Getting Started: <br>
 1. Install node from https://nodejs.org/en/ <br>
 2. Download this RPG onto your desktop.<br>
 3. Go into beam-rpg/db/settings.json <br>
-4. Put in your scottybot auth code from the scottybot GUI, and edit any other settings you see fit here. <br>
+4. Fill out game settings with your own information.<br>
 5. Time to create the scottybot commands we'll need! Look below for the commands you'll need create in the Scottybot GUI.<br>
 6. Run node.js and direct it to wherever you've stored the beam RPG folder. <br>
-7. Type "node beam-rpg" to start up the service.
+7. Install required node modules. (below).
+8. Type "node beam-rpg" to start up the service.
+
+Required Modules:
+- npm install ws 
+- npm install node-json-db --save
+- npm install request
+- npm install roll
+- npm i -S beam-client-node beam-interactive-node robotjs
 
 Scotty Commands: <br>
   - !rpg : (_null_)
@@ -21,3 +29,10 @@ Scotty Commands: <br>
   
 FAQ:
 - If someone runs an !rpg command and it does not show as in the node window that means the command was not create in the scotty gui.
+
+Required Module URLS:
+http://websockets.github.io/ws/
+https://www.npmjs.com/package/node-json-db
+https://github.com/request/request
+https://github.com/troygoode/node-roll
+https://dev.beam.pro

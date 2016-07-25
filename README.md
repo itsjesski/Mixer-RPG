@@ -8,7 +8,7 @@ Getting Started: <br>
 4. Fill out game settings with your own information.<br>
 5. Time to create the scottybot commands we'll need! Look below for the commands you'll need create in the Scottybot GUI.<br>
 6. Run node.js and direct it to wherever you've stored the beam RPG folder. <br>
-7. Install required node modules. (below).
+7. Install required node modules. (below). <br>
 8. Type "node beam-rpg" to start up the service.
 
 Required Modules:

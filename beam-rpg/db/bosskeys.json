@@ -1,0 +1,13 @@
+{
+    "keys": [],
+    "exampleEntry": [
+        {
+            "name": "The Kentucky Killer",
+            "strength": 65,
+            "guile": 60,
+            "magic": 60,
+            "gameName": "Kentucky Route Zero",
+            "key": "steam-key"
+        }
+    ]
+}

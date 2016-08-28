@@ -1,6 +1,7 @@
 // General Settings
 var openTime = 8000;
 queue = [];
+timesClicked = 0;
 
 // Check queue every few seconds.
 setInterval(function(){ 
@@ -12,13 +13,24 @@ setInterval(function(){
 function beamSocketConnect(){
 	if ("WebSocket" in window){
 		// Let us open a web socket
-		var ws = new ReconnectingWebSocket("ws://localhost:8080");
+		ws = new ReconnectingWebSocket("ws://localhost:8080");
 		ws.onopen = function(){
 			console.log("Connection is opened...");
 		};
 
 		ws.onmessage = function (evt){
-			queue.push(evt);
+			var obj = JSON.parse(evt.data);
+			if (obj.event == "mouseclick"){
+				mouseclick(obj);
+			} else if (obj.event == "bossFight"){
+				canvasSetup();
+				var bossName = obj.name;
+				bossGenerator(bossName);
+				bossRender();
+				bossStart();
+			} else {
+				queue.push(evt);
+			}
 		};
 
 		ws.onclose = function(){
@@ -81,7 +93,19 @@ function profileBuilder(){
 			$('.loot-reward-name').text("!rpg-raid");
 			// Trigger Sound
 			$('.monster-sound').trigger("play");
-		}else {
+		} else if (event == "boss"){
+			var bossName = obj.bossName;
+			var bossGame = obj.bossGame;
+			
+			$('.loot-img.mimic').show();
+			$('.loot-img.regular, .loot-img.raidtarget').hide();
+			$('.clear').empty();
+			$('.loot-name').text(username);
+			$('.loot-reward').text('fought '+bossName);
+			$('.loot-reward-name').text('and won '+bossGame+'.');
+			// Trigger Sound
+			$('.monster-sound').trigger("play");
+		} else {
 			$('.loot-img.mimic, .loot-img.raidtarget').hide();
 			$('.loot-img.regular').show();
 			$('.clear').empty();
@@ -99,6 +123,80 @@ function profileBuilder(){
 		// Remove from queue after build.
 		queue.splice(0,1);
 	}
+}
+
+///////////////////////
+// Interactive Game
+//////////////////////
+
+// Mouse Clicks for Interactive
+function mouseclick(obj){
+	var mousex = Math.round(obj.mousex);
+	var mousey = Math.round(obj.mousey);
+	var clicks = obj.clicks;
+	gameClicker(mousex, mousey, clicks);
+}
+
+// Set up canvas.
+function canvasSetup(){
+		elem = document.getElementById('game');
+		elemLeft = elem.offsetLeft;
+		elemTop = elem.offsetTop;
+		context = elem.getContext('2d');
+}
+
+
+// Collision Checker
+function gameClicker(mousex, mousey, clicks){
+    var x = mousex,
+        y = mousey;
+    elements.forEach(function(element) {
+        if (y > element.y - element.height && y < element.y + element.height && x > element.x - element.width && x < element.x + element.width) {
+            // Element was clicked!
+			
+			timesClicked = timesClicked + clicks;
+			
+        }
+    });
+}
+
+// Add element.
+function bossGenerator(name){
+	elements = [];
+	var screenWidth = 1920;
+	var screenHeight = 1080;
+	
+	elements.push({
+		image: './images/monsters/'+name+'.png',
+		width: 350,
+		height: 350,
+		y: 500,
+		x: 1500,
+		isVisible: true
+	});
+}
+function bossRender(){
+	// Render elements.
+	elements.forEach(function(element) {
+		if(element.isVisible === true){
+			var imageObj = new Image();
+			imageObj.onload = function(){
+				context.drawImage(imageObj, element.x, element.y);
+			}
+			imageObj.src = element.image;
+		}
+	});
+}
+function bossStart(){
+	$('.horn-sound').trigger("play");
+	setTimeout(function(){ 
+		ws.send(JSON.stringify({
+			"event": "bossFightEnd",
+			"data": timesClicked
+		}));
+		timesClicked = 0;
+		context.clearRect(0, 0, 1920, 1080);
+	}, 11000);
 }
 
 // Volume Control

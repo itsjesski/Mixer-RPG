@@ -1,15 +1,34 @@
 {
-	"scottyauth": "Scottyboth Auth Code Here",
-	"cmdCooldownTime": 60000,
-	"dailyReward": 50,
-	"dueling": {
-		"active": true,
-		"minBet": 50
-	},
-	"raid":{
-		"timer": 60000,
-		"winReward": 50,
-		"loseReward": 25,
-		"raidMessage": "Your raid message goes here."
-	}
+    "scottyauth": "scottyauth",
+    "botName": "beam-bot-name",
+    "beamInteractive": {
+        "active": false,
+        "channelID": 00000,
+        "username": "beam-username",
+        "password": "beam-password"
+    },
+    "cmdCooldownTime": 60000,
+    "requireWhispers": false,
+    "dailyReward": 50,
+    "playerDuel": {
+        "active": true,
+        "minBet": 50
+    },
+    "companionDuel": {
+        "active": true,
+        "minBet": 50
+    },
+    "bossKey": {
+        "winTimer": 259200000,
+        "noKeyReward": 700
+    },
+    "raid": {
+        "timer": 30000,
+        "winReward": 50,
+        "loseReward": 25,
+        "raidMessage": "Alright, time for a raid! Copy/paste this into their chat: Raid message here."
+    },
+    "inactive": {
+        "timer": 2592000000
+    }
 }

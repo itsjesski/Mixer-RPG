@@ -10,7 +10,8 @@
     </head>
     <body>
 
-        <div class="wrapper">
+        <div class="wrapper" id="wrapper">
+			<canvas id="game" width="1920px" height="1080px"></canvas>
             <div class="looter" style="display:none;">
                 <div class="loot-img regular" style="display:none;"><img src="./images/chest-open.gif"></div>
                 <div class="loot-img mimic" style="display:none;"><img src="./images/mimic.gif"></div>
@@ -31,6 +32,9 @@
             </audio>
             <audio controls id="monsterAudio" class="monster-sound">
               <source src="sound/monster.ogg" type="audio/ogg" volume=".2">
+            </audio>
+            <audio controls id="hornAudio" class="horn-sound">
+              <source src="sound/horn.ogg" type="audio/ogg" volume=".2">
             </audio>
         </div>
 

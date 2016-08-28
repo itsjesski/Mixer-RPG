@@ -195,6 +195,12 @@
 			"magic": 4
 		},
 		{
+			"name": "Pink",
+			"strength": 1,
+			"guile": 2,
+			"magic": 7
+		},
+		{
 			"name": "Bloody",
 			"strength": 1,
 			"guile": 8,

@@ -1,5 +1,24 @@
 {
 	"creatureAttribute": ["Flying", "Galloping", "Slow", "Fast", "Patient", "Crazy", "Insane", "Blue", "Green", "Red", "Metal", "Soft", "Smart", "Dumb", "Talking", "Weird", "Ancient", "Aged", "Mean", "Friendly", "Mad", "Happy"], 
 
-	"monster": ["Mimic", "Kobold", "Dragon", "Giant", "Rat", "Ape", "Orc", "Goblin", "Necromancer", "Mercenary", "Barbarian", "Thug", "Staircase", "Bartender", "Hydra", "Firebottle", "Waterbottle", "Bandit", "Duke", "King", "Beggar", "Chicken", "Snake", "Cyclops", "Wanderer", "Bird", "Shadow"]
+	"monster": ["Mimic", "Kobold", "Dragon", "Giant", "Rat", "Ape", "Orc", "Goblin", "Necromancer", "Mercenary", "Barbarian", "Thug", "Staircase", "Bartender", "Hydra", "Firebottle", "Waterbottle", "Bandit", "Duke", "King", "Beggar", "Chicken", "Snake", "Cyclops", "Wanderer", "Bird", "Shadow"],
+
+	"bossFight": [
+		{
+			"name": "Balrog",
+			"clicksPerPerson": 15,
+			"reward": 400
+		},
+		{
+			"name": "Beholder",
+			"clicksPerPerson": 10,
+			"reward": 350
+		},
+		{
+			"name": "Zombie Horde",
+			"clicksPerPerson": 5,
+			"reward": 300
+		}	
+	]
+	
 }

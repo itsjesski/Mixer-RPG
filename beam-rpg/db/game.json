@@ -1,15 +1,59 @@
 {
-	"duel": {
-		"settings" :{
-			"inProgress": false,
-			"amount": "0",
-			"expireTime": 0
-		},
-		"playerOne": {
-			"name": ""
-		},
-		"playerTwo": {
-			"name": ""
-		}
+    "companionDuel": {
+        "settings": {
+            "inProgress": true,
+            "amount": 1000,
+            "expireTime": 1472346629314
+        },
+        "playerOne": {
+            "name": "Dethryl",
+            "userid": 151383,
+            "companionName": "Small Galloping Dragon",
+            "companionStrength": 14,
+            "companionGuile": 12,
+            "companionMagic": 4
+        }
+    },
+    "playerDuel": {
+        "settings": {
+            "inProgress": false,
+            "amount": 0,
+            "expireTime": 0
+        },
+        "playerOne": {
+            "name": "none"
+        }
+    },
+    "shop": {
+        "item1": {
+            "price": 1245,
+            "itemName": "EngineerWilky81's Gloves",
+            "strength": 5,
+            "guile": 1,
+            "magic": 5,
+            "slot": "trophy"
+        },
+        "item2": {
+            "itemName": "Dwarf Houndmaster",
+            "strength": 10,
+            "guile": 8,
+            "magic": 2,
+            "price": 1998,
+            "slot": "title"
+        },
+        "item3": {
+            "itemName": "Tiny Steel Halberd",
+            "strength": 15,
+            "guile": 12,
+            "magic": 3,
+            "price": 1651,
+            "slot": "melee"
+        }
+    },
+    "bossFight": {
+        "name": "Beholder",
+        "clicksNeeded": 390,
+        "reward": 350,
+        "defeated": true
     }
 }

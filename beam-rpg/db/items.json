@@ -1252,6 +1252,36 @@
 			"strength":5,
 			"guile": 1,
 			"magic": 4
+		},
+		{
+			"name": "Dragonman", 
+			"strength":7,
+			"guile": 1,
+			"magic": 2
+		},
+		{
+			"name": "Venusian", 
+			"strength":3,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Wrinkly", 
+			"strength":2,
+			"guile": 4,
+			"magic": 4
+		},
+		{
+			"name": "Babyface", 
+			"strength":3,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Sneaky", 
+			"strength":3,
+			"guile": 5,
+			"magic": 2
 		}
 	],
 	"title":[
@@ -1260,6 +1290,30 @@
 			"strength":4,
 			"guile": 4,
 			"magic": 2
+		},
+		{
+			"name": "Princess", 
+			"strength":1,
+			"guile": 5,
+			"magic": 4
+		},
+		{
+			"name": "Duchess", 
+			"strength":3,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Witch", 
+			"strength":1,
+			"guile": 3,
+			"magic": 6
+		},
+		{
+			"name": "Queen", 
+			"strength":3,
+			"guile": 4,
+			"magic": 3
 		},
 		{
 			"name": "Swordfighter", 
@@ -1392,6 +1446,36 @@
 			"strength":3,
 			"guile": 1,
 			"magic": 6
+		},
+		{
+			"name": "Bully", 
+			"strength":5,
+			"guile": 4,
+			"magic": 1
+		},
+		{
+			"name": "Hamster Tamer", 
+			"strength":2,
+			"guile": 7,
+			"magic": 1
+		},
+		{
+			"name": "Hairstylist", 
+			"strength":2,
+			"guile": 3,
+			"magic": 5
+		},
+		{
+			"name": "Engineer", 
+			"strength":4,
+			"guile": 3,
+			"magic": 3
+		},
+		{
+			"name": "Brawler", 
+			"strength":6,
+			"guile": 2,
+			"magic": 1
 		}
 	],
 	"companion":[
@@ -1564,7 +1648,55 @@
 			"strength":4,
 			"guile": 4,
 			"magic": 3
+		},
+		{
+			"name": "Pants",
+			"strength":4,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Gun",
+			"strength":3,
+			"guile": 4,
+			"magic": 4
+		},
+		{
+			"name": "Library",
+			"strength":2,
+			"guile": 4,
+			"magic": 5
+		},
+		{
+			"name": "Glasses",
+			"strength":3,
+			"guile": 4,
+			"magic": 4
+		},
+		{
+			"name": "Heirloom",
+			"strength":3,
+			"guile": 4,
+			"magic": 4
+		},
+		{
+			"name": "Robot",
+			"strength":4,
+			"guile": 3,
+			"magic": 4
+		},
+		{
+			"name": "Shoes",
+			"strength":4,
+			"guile": 5,
+			"magic": 2
+		},
+		{
+			"name": "Birthday",
+			"strength":4,
+			"guile": 2,
+			"magic": 5
 		}
 	],
-	"currency": [100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400]
+	"currency": [350, 375, 400, 425, 450, 475, 500, 525, 550, 575, 600, 625, 650]
 }

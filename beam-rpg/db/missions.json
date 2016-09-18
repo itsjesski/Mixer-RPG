@@ -1,0 +1,116 @@
+{
+	"training": [
+		{
+			"text": "You decide to go to the mountains and bring boulders back to build a bridge. No cart needed. You'll use your hands.",
+			"strength": 1,
+			"guile": 0,
+			"magic": 0,
+			"coins": 0
+		},
+		{
+			"text": "You go for a jog around Lake Beam. The friendly environment invigorates you.",
+			"strength": 0,
+			"guile": 1,
+			"magic": 0,
+			"coins": 0
+		},
+		{
+			"text": "You grab a book from your collection and begin reading. It is a rare guide to magic.",
+			"strength": 0,
+			"guile": 0,
+			"magic": 1,
+			"coins": 0
+		},
+		{
+			"text": "You go into the city to purchase supplies for your next adventure. You learn quite a bit about haggling.",
+			"strength": 0,
+			"guile": 1,
+			"magic": 0,
+			"coins": 100
+		},
+		{
+			"text": "You run in to the local boxing champion. He challenges you to a friendly fight. You win!",
+			"strength": 1,
+			"guile": 0,
+			"magic": 0,
+			"coins": 100
+		},
+		{
+			"text": "An angry man dressed in rediculous robes challenges you to a magic duel. You win, but you learn a thing or two about shady magic.",
+			"strength": 0,
+			"guile": 0,
+			"magic": 1,
+			"coins": 100
+		},
+		{
+			"text": "You purchase a potion from a wandering alchemist. You drink it and feel like a new person.",
+			"strength": 1,
+			"guile": 1,
+			"magic": 1,
+			"coins": 0
+		},
+		{
+			"text": "You spend some time with a local inventor who shows you a thing or two about mechanical engineering.",
+			"strength": 0,
+			"guile": 1,
+			"magic": 1,
+			"coins": 0
+		},
+		{
+			"text": "Some local kids need your help finding a rare species of Botomon. After several hours you're able to catch one.",
+			"strength": 1,
+			"guile": 1,
+			"magic": 0,
+			"coins": 0
+		},
+		{
+			"text": "You are invited to attend a meeting between mage knights in the area. They celebrate your accomplishments and teach you of their ways.",
+			"strength": 1,
+			"guile": 0,
+			"magic": 1,
+			"coins": 0
+		},
+		{
+			"text": "You are asked to help move a friend out of their home. You reluctantly agree to help.",
+			"strength": 1,
+			"guile": 0,
+			"magic": 0,
+			"coins": 0
+		},
+		{
+			"text": "You head to the local bar to play a few hands of cards. One person at the table is cheater, and you learn a few tricks.",
+			"strength": 0,
+			"guile": 1,
+			"magic": 0,
+			"coins": 0
+		},
+		{
+			"text": "You decide to spend the day bulk cooking meals for the week. It saves money. You manage to mix an alchemical ingredient to better preserve the food.",
+			"strength": 0,
+			"guile": 0,
+			"magic": 1,
+			"coins": 0
+		},
+		{
+			"text": "You get into a pushup competition with a group of young men. When one man is left, you switch to one arm just to show him up.",
+			"strength": 1,
+			"guile": 0,
+			"magic": 0,
+			"coins": 200
+		},
+		{
+			"text": "You decide to take on a new hobby. Dance! The instructor laughs at your initial attempts, but you get much better! You even win a bet between the beginners!",
+			"strength": 0,
+			"guile": 1,
+			"magic": 0,
+			"coins": 200
+		},
+		{
+			"text": "You manage to mix together a potion that can give extrodinary luck. You excitedly go to the market to sell it. After you do you realize you forgot to write down the recipe.",
+			"strength": 0,
+			"guile": 0,
+			"magic": 1,
+			"coins": 200
+		}
+	]
+}

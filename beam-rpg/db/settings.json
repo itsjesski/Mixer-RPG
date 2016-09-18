@@ -1,15 +1,7 @@
 {
-    "scottyauth": "scottyauth",
-    "botName": "beam-bot-name",
-    "beamInteractive": {
-        "active": false,
-        "channelID": 00000,
-        "username": "beam-username",
-        "password": "beam-password"
-    },
-    "cmdCooldownTime": 60000,
+    "botName": "Firebot",
     "requireWhispers": false,
-    "dailyReward": 50,
+    "dailyReward": 100,
     "playerDuel": {
         "active": true,
         "minBet": 50
@@ -18,15 +10,15 @@
         "active": true,
         "minBet": 50
     },
-    "bossKey": {
-        "winTimer": 259200000,
-        "noKeyReward": 700
+    "triviaDuel": {
+        "active": true,
+        "minBet": 50
     },
     "raid": {
         "timer": 30000,
-        "winReward": 50,
-        "loseReward": 25,
-        "raidMessage": "Alright, time for a raid! Copy/paste this into their chat: Raid message here."
+        "winReward": 100,
+        "loseReward": 50,
+        "raidMessage": "Alright, time for a raid! Copy/paste this into their chat: Fire that streamer! The firebots are taking over!"
     },
     "inactive": {
         "timer": 2592000000

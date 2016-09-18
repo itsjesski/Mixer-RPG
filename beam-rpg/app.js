@@ -1,10 +1,6 @@
 // Requirements
 // These are required node modules.
 var WebSocket = require('ws');
-var WebSocketServer = require('ws').Server,
-	wss = new WebSocketServer({
-		port: 8080
-	});
 var JsonDB = require('node-json-db');
 var request = require('request');
 var Roll = require('roll'),
@@ -13,20 +9,19 @@ var Roll = require('roll'),
 
 // Database Setup (name / save after each push / human readable format).
 // This makes sure these database files exist.
+var dbAuth = new JsonDB("db/auth", true, true);
 var dbSettings = new JsonDB("db/settings", true, true);
 var dbItems = new JsonDB("db/items", true, true);
 var dbPlayers = new JsonDB("db/players", true, true);
 var dbMonsters = new JsonDB("db/monsters", true, true);
 var dbGame = new JsonDB("db/game", true, true);
-var dbBossKeys = new JsonDB("db/bosskeys", true, true);
+var dbMissions = new JsonDB("db/missions", true, true);
 
 // General Settings
 // Basic app variables used with game.
 rpgApp = {
-	scottyauth: dbSettings.getData("/scottyauth"),
-	interactive: dbSettings.getData("/beamInteractive/active"),
-	chanID: dbSettings.getData("/beamInteractive/channelID"),
-	rpgCommands: "!coins, !rpg-inventory, !rpg-daily, !rpg-adventure (cost: 400), !rpg-boss (cost: 1000), !rpg-arena (bet), !rpg-duel (bet), !rpg-shop",
+	scottyauth: dbAuth.getData("/scottyauth"),
+	rpgCommands: "!coins, !rpg-inventory, !rpg-daily, !rpg-adventure (cost: 500), !rpg-training (cost: 2000) !rpg-arena (bet), !rpg-duel (bet), !rpg-shop, !rpg-shop-refresh (cost: 750)",
 	raidTimer: dbSettings.getData("/raid/timer"),
 	cmdCooldownActive: false,
 	raidActive: false,
@@ -46,7 +41,8 @@ rpgApp = {
 	titleList: dbItems.getData("/title"),
 	companionList: dbItems.getData("/companion"),
 	currencyList: dbItems.getData("/currency"),
-	trophyList: dbItems.getData("/trophy")
+	trophyList: dbItems.getData("/trophy"),
+	training: dbMissions.getData("/training")
 };
 
 // Websocket Client Setup (Scottybot Connection)
@@ -76,24 +72,6 @@ function wsconnect(){
 	})
 }
 wsconnect();
-
-// Websocket Server
-// This allows for the wss.broadcast call to send out data via websocket.
-wss.broadcast = function broadcast(data) {
-	wss.clients.forEach(function each(client) {
-		client.send(data);
-	});
-};
-// This allows the websocket server to accept incoming packets from overlay.
-wss.on('connection', function connection(ws) {
-  ws.on('message', function incoming(message) {
-	var message = JSON.parse(message);
-	var eventType = message.event;
-	if(eventType == "bossFightEnd"){
-		bossFightEnd(message.data);
-	}
-  });
-});
 
 /////////////////////////
 // Scotty Command Center  
@@ -147,9 +125,6 @@ function scottyCommands(username, userid, command, rawcommand, isMod){
 	} else if (command == "rpg-raid") {
 		rpgRaidEvent(username, rawcommand, isMod);
 		dbLastSeen(username);
-	} else if (command == "rpg-boss"){
-		rpgBoss(username, userid);
-		dbLastSeen(username);
 	} else if (command == "rpg-arena"){
 		rpgCompanionDuel(username, userid, rawcommand);
 		dbLastSeen(username);
@@ -159,14 +134,17 @@ function scottyCommands(username, userid, command, rawcommand, isMod){
 	} else if (command == "rpg-shop"){
 		rpgShopPurchase(username, userid, rawcommand);
 		dbLastSeen(username);
-	}
-
-	// Commands inside of cooldown.
-	// Make sure cmdCooldownActive check is in place and that the command cooldown function is run.
-	if (command == "rpg-adventure" && rpgApp.cmdCooldownActive === false) {
+	} else if (command == "rpg-shop-refresh"){
+		rpgShopLoop();
+		sendBroadcast('A new travelling salesman has come to town! Type !rpg-shop to see his supply.');
+	} else if (command == "rpg-training"){
+		rpgTraining(username, userid);
+	} else if (command == "rpg-adventure") {
 		rpgAdventure(username, userid);
 		dbLastSeen(username);
-		commandCooldown();
+	} else if (command == "rpg-trivia"){
+		rpgTriviaDuel(username, userid, rawcommand);
+		dbLastSeen(username);
 	}
 }
 
@@ -277,16 +255,34 @@ function dbPlayerKeeper(username) {
 // General / Helper
 ///////////////////
 
-// Command Cooldown
-// This manages the global command cooldown.
-function commandCooldown() {
-	var cooldownTimer = dbSettings.getData("/cmdCooldownTime");
-	rpgApp.cmdCooldownActive = true;
+// Array Shuffler
+// Shuffles an array.
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
 
-	setTimeout(function() {
-		rpgApp.cmdCooldownActive = false;
-		sendBroadcast("(∩｀-´)⊃━☆ RPG is ready for commands!");
-	}, cooldownTimer);
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
+// Parse Trivia HTML Nonsense
+// Parses trival stuff.
+function parseHtml(str) {
+    return str.replace(/&#([0-9]{1,3});/gi, function(match, numStr) {
+        var num = parseInt(numStr, 10); // read num as normal number
+        return String.fromCharCode(num);
+    });
 }
 
 // Millisecond to Human Converter
@@ -592,6 +588,26 @@ function characterStats(username) {
 		var guile = 0;
 		var magic = 0;
 	}
+	
+	var totalStrength = totalStrength + strength;
+	var totalGuile = totalGuile + guile;
+	var totalMagic = totalMagic + magic;
+	
+	try {
+		var strength = dbPlayers.getData("/" + username + "/prowess/strength");
+	} catch (error) {
+		var strength = 0;
+	}
+	try {
+		var guile = dbPlayers.getData("/" + username + "/prowess/guile");
+	} catch (error) {
+		var guile = 0;
+	}
+	try {
+		var magic = dbPlayers.getData("/" + username + "/prowess/magic");
+	} catch (error) {
+		var magic = 0;
+	}
 
 	var totalStrength = totalStrength + strength;
 	var totalGuile = totalGuile + guile;
@@ -654,11 +670,9 @@ function buyMonster(username, userid) {
 		var coins = 250;
 		addPoints(userid, coins);
 		sendWhisper(username, "You defeated a "+monsterName+". Reward: 50 coins.");
-		wss.broadcast('{"uname": "' + username + '", "event": "mimic",  "eventText": "fight", "data": "' + monsterName + '", "result": "won"}');
 	} else {
 		// Player lost. Points for the points god!
 		sendWhisper(username, "You were defeated by the "+monsterName+"! Try again!");
-		wss.broadcast('{"uname": "' + username + '", "event": "mimic",  "eventText": "fight", "data": "' + monsterName + '", "result": "lost"}');
 	}
 };
 
@@ -676,7 +690,6 @@ function buyMelee(username) {
 	// Push info to queue
 	console.log('BeamRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
 	sendWhisper(username, "You found a weapon: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it.");
-	wss.broadcast('{"uname": "' + username + '", "event": "melee", "eventText": "weapon", "data": "' + itemName + '", "stats": "Str:' + strengthStat + ' Guile:' + guileStat + ' Int:' + magicStat + '"}');
 
 	// Push to DB
 	dbPlayerHolder(username, "holding", "melee", itemName, strengthStat, guileStat, magicStat);
@@ -696,7 +709,6 @@ function buyRanged(username) {
 	// Push info to queue
 	console.log('BeamRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
 	sendWhisper(username,"You found a ranged weapon: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it.");
-	wss.broadcast('{"uname": "' + username + '", "event": "ranged", "eventText": "weapon", "data": "' + itemName + '", "stats": "Str:' + strengthStat + ' Dex:' + guileStat + ' Int:' + magicStat + '"}');
 
 	// Push to DB
 	dbPlayerHolder(username, "holding", "ranged", itemName, strengthStat, guileStat, magicStat);
@@ -716,7 +728,6 @@ function buyMagic(username) {
 	// Push info to queue
 	console.log('BeamRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
 	sendWhisper(username,"You learned a spell: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it.");
-	wss.broadcast('{"uname": "' + username + '", "event": "magic", "eventText": "spell", "data": "' + itemName + '", "stats": "Str:' + strengthStat + ' Dex:' + guileStat + ' Int:' + magicStat + '"}');
 
 	// Push to DB
 	dbPlayerHolder(username, "holding", "magic", itemName, strengthStat, guileStat, magicStat);
@@ -736,7 +747,6 @@ function buyArmor(username) {
 	// Push info to queue
 	console.log('BeamRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
 	sendWhisper(username, "You found armor: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it.");
-	wss.broadcast('{"uname": "' + username + '", "event": "armor", "eventText": "armor", "data": "' + itemName + '", "stats": "Str:' + strengthStat + ' Dex:' + guileStat + ' Int:' + magicStat + '"}');
 
 	// Push to DB
 	dbPlayerHolder(username, "holding", "armor", itemName, strengthStat, guileStat, magicStat);
@@ -756,7 +766,6 @@ function buyMount(username) {
 	// Push info to queue
 	console.log('BeamRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
 	sendWhisper(username,"You found a mount: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it.");
-	wss.broadcast('{"uname": "' + username + '", "event": "mount", "eventText": "mount", "data": "' + itemName + '", "stats": "Str:' + strengthStat + ' Dex:' + guileStat + ' Int:' + magicStat + '"}');
 
 	// Push to DB
 	dbPlayerHolder(username, "holding", "mount", itemName, strengthStat, guileStat, magicStat);
@@ -775,7 +784,6 @@ function buyTitle(username) {
 	// Push info to queue
 	console.log('BeamRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
 	sendWhisper(username,"You won a title: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it.");
-	wss.broadcast('{"uname": "' + username + '", "event": "title", "eventText": "title", "data": "' + itemName + '", "stats": "Str:' + strengthStat + ' Dex:' + guileStat + ' Int:' + magicStat + '"}');
 
 	// Push to DB
 	dbPlayerHolder(username, "holding", "title", itemName, strengthStat, guileStat, magicStat);
@@ -795,7 +803,6 @@ function buyCompanion(username) {
 	// Push info to queue
 	console.log('BeamRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
 	sendWhisper(username, "You found a companion: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it.");
-	wss.broadcast('{"uname": "' + username + '", "event": "companion", "eventText": "companion", "data": "' + itemName + '", "stats": "Str:' + strengthStat + ' Dex:' + guileStat + ' Int:' + magicStat + '"}');
 
 	// Push to DB
 	dbPlayerHolder(username, "holding", "companion", itemName, strengthStat, guileStat, magicStat);
@@ -809,7 +816,6 @@ function buyCoins(username, userid) {
 	// Push info to queue
 	console.log('BeamRPG: ' + username + ' got ' + coins + ' coins.');
 	sendWhisper(username,"You found "+coins+" coins!");
-	wss.broadcast('{"uname": "' + username + '", "event": "coin", "data": ' + coins + '}')
 
 	// Add points to user in scottybot
 	addPoints(userid, coins);
@@ -828,7 +834,6 @@ function buyTrophy(username, streamerName) {
 	// Push info to queue
 	console.log('BeamRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
 	sendWhisper(username,"You found a trophy: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it.");
-	wss.broadcast('{"uname": "' + username + '", "event": "trophy", "eventText": "trophy", "data": "' + itemName + '", "stats": "Str:' + strengthStat + ' Dex:' + guileStat + ' Int:' + magicStat + '"}');
 
 	// Push to DB
 	dbPlayerHolder(username, "holding", "trophy", itemName, strengthStat, guileStat, magicStat);
@@ -837,6 +842,8 @@ function buyTrophy(username, streamerName) {
 // RPG Inventory
 // Prints out a players inventory.
 function rpgInventory(username) {
+	// Recalc total.
+	characterStats(username);
 
 	try {
 		var title = dbPlayers.getData("/" + username + "/title/name");
@@ -925,6 +932,23 @@ function rpgInventory(username) {
 		var trophy = "None";
 		var trophyStats = "(0/0/0)";
 	}
+	
+	try {
+		var prowessStrength = dbPlayers.getData("/" + username + "/prowess/strength");
+	} catch (error) {
+		var prowessStrength = 0;
+	}
+	try {
+		var prowessGuile = dbPlayers.getData("/" + username + "/prowess/guile");
+	} catch (error) {
+		var prowessGuile = 0;
+	}
+	try {
+		var prowessMagic = dbPlayers.getData("/" + username + "/prowess/magic");
+	} catch (error) {
+		var prowessMagic = 0;
+	}
+	var prowessStats = "("+prowessStrength+"/"+prowessGuile+"/"+prowessMagic+")";
 
 	try {
 		var strength = dbPlayers.getData("/" + username + "/stats/strength");
@@ -935,7 +959,7 @@ function rpgInventory(username) {
 		var charStats = "Error";
 	}
 
-	var sayInventory = username + " the " + title + " " + titleStats + " || Melee: " + melee + " " + meleeStats + " || Ranged: " + ranged + " " + rangedStats + " || Magic: " + magicName + " " + magicStats + " || Armor: " + armor + " " + armorStats + " || Mount: " + mount + " " + mountStats + " || Companion: " + companion + " " + companionStats + " || Trophy: " + trophy + " " + trophyStats + " || Total: " + charStats;
+	var sayInventory = username + " the " + title + " " + titleStats + " || Melee: " + melee + " " + meleeStats + " || Ranged: " + ranged + " " + rangedStats + " || Magic: " + magicName + " " + magicStats + " || Armor: " + armor + " " + armorStats + " || Mount: " + mount + " " + mountStats + " || Companion: " + companion + " " + companionStats + " || Trophy: " + trophy + " " + trophyStats + " || Prowess: "+prowessStats+" || Total: " + charStats;
 
 	sendWhisper(username, sayInventory);
 }
@@ -1040,6 +1064,7 @@ function rpgCombat(userOne, userTwo, diceToRoll) {
 	console.log('Combat Results: ' + personOne.name + ': ' + personOneWin + ' vs ' + personTwo.name + ': ' + personTwoWin);
 
 	sendWhisper(personOneName, "Combat Results: " + personOne.name + " (" + personOneStrength + "/" + personOneGuile + "/" + personOneMagic + ") won "+personOneWin+" times. vs " + personTwo.name + " (" + personTwoStrength + "/" + personTwoGuile + "/" + personTwoMagic + ") won "+personTwoWin+" times.");
+	
 	sendWhisper(personTwoName, "Combat Results: " + personOne.name + " (" + personOneStrength + "/" + personOneGuile + "/" + personOneMagic + ") won "+personOneWin+" times. vs " + personTwo.name + " (" + personTwoStrength + "/" + personTwoGuile + "/" + personTwoMagic + ") won "+personTwoWin+" times.");
 
 	if (personOneWin > personTwoWin) {
@@ -1085,8 +1110,6 @@ function rpgAdventure(username, userid) {
 		//Coins
 		buyCoins(username, userid);
 	}
-
-	sendBroadcast( username + " went on an adventure! I\'ll let you know when the adventure cooldown is over!");
 }
 
 // RPG Daily Quest
@@ -1126,41 +1149,19 @@ function rpgRaidEvent(username, rawcommand, isMod) {
 				// Great, valid raid target. Get target info, set raid to active, send broadcast to overlay with info.
 				var data = JSON.parse(body);
 				var streamUrl = "https://beam.pro/" + raidTarget;
-				var avatar = data.user.avatarUrl;
 				sendBroadcast(username+" has started a raid! Type !rpg-raid to join!");
-				wss.broadcast('{"uname": "' + username + '", "event": "raid", "raidTarget": "' + raidTarget + '", "raidTargetAvatar": "' + avatar + '"}');
 				rpgApp.raidActive = true;
 
 				// Start timer for raid event based on setting in settings db.
 				setTimeout(function() {
-					var raidStrength = 0;
-					var raidGuile = 0;
-					var raidMagic = 0;
-					var raiderCount = 0;
-					for (var key in rpgApp.raiderList) {
-						var player = rpgApp.raiderList[key];
-						var strength = player.strength;
-						var guile = player.guile;
-						var magic = player.magic;
-						var raidStrength = raidStrength + strength;
-						var raidGuile = raidGuile + guile;
-						var raidMagic = raidMagic + magic;
-						var raiderCount = raiderCount + 1;
-					};
-
-					// Generate random Boss stats based on party size.
-					var bossModifier = (Math.floor(Math.random() * raiderCount) + 1);
-					var bossStrength = raidStrength + bossModifier;
-					var bossGuile = raidGuile + bossModifier;
-					var bossMagic = raidMagic + bossModifier;
-
-					var raidParty = '{"name": "Raiders", "strength": ' + raidStrength + ', "guile": ' + raidGuile + ', "magic": ' + raidMagic + '}';
-					var bossMonster = '{"name":"' + raidTarget + '", "strength": ' + bossStrength + ', "guile": ' + bossGuile + ', "magic": ' + bossMagic + '}';
-
-					var combatResults = rpgCombat(raidParty, bossMonster, raiderCount);
-
-					// If combat is won, send everyone coins and one random person a trophy. Else, give everyone some coins.
-					if (combatResults == "Raiders") {
+					
+					var diceRoller = (dice.roll({
+						quantity: 1,
+						sides: 20,
+						transformations: ['sum']
+					})).result;
+					
+					if (diceRoller <= 3){
 						var luckyPerson = rpgApp.raiderList[Math.floor(Math.random() * rpgApp.raiderList.length)];
 						var luckyPersonName = luckyPerson.name;
 						buyTrophy(luckyPersonName, raidTarget);
@@ -1172,7 +1173,7 @@ function rpgRaidEvent(username, rawcommand, isMod) {
 						var raidLoseCoin = dbSettings.getData("/raid/loseReward");
 						giveallPoints(raidLoseCoin);
 						sendBroadcast("The raid has ended. Winner: " + combatResults + ". Everyone gets " + raidLoseCoin + " coins for your repair bill.");
-					};
+					}
 
 					// Get raid message and send that to chat when everything is over.
 					var raidMessage = dbSettings.getData("/raid/raidMessage");
@@ -1193,98 +1194,16 @@ function rpgRaidEvent(username, rawcommand, isMod) {
 		// Raid is active. Add user to raid participant list if they're not already there.
 		var raiderName = search(username, rpgApp.raiderList);
 		if (raiderName === undefined) {
-			try {
-				var strength = dbPlayers.getData("/" + username + "/stats/strength");
-				var guile = dbPlayers.getData("/" + username + "/stats/guile");
-				var magic = dbPlayers.getData("/" + username + "/stats/magic");
-				rpgApp.raiderList.push({
-					"name": username,
-					"strength": strength,
-					"guile": guile,
-					"magic": magic
-				});
-				sendWhisper(username, "You\'ve joined the raid!");
-			} catch (error) {
-				sendWhisper(username, "You don\'t seem to have a character! Run at least one !rpg-adventure first.");
-			}
+			rpgApp.raiderList.push({
+				"name": username,
+			});
+			sendWhisper(username, "You\'ve joined the raid!");
 		} else {
 			sendWhisper(username, "You\'ve already joined the raid!");
 		}
 	} else {
 		// No raid is active
 		sendWhisper(username, "There is currently not an active raid.");
-	}
-}
-
-// RPG Boss
-// This allows a user to pay money to fight a boss. If you win you'll get a boss key.
-function rpgBoss(username, userid){
-
-	var winTimer = dbSettings.getData("/bossKey/winTimer");
-	var noKeyReward = dbSettings.getData("/bossKey/noKeyReward");
-
-	// Get last boss key date from player.
-	try {
-		var lastKey = dbPlayers.getData("/" + username + "/lastSeen/bossKey");
-	} catch (error) {
-		var lastKey = 1;
-	}
-	var date = new Date().getTime();
-	var timeSinceLastKey = date - lastKey;
-	var timeUntilNext = winTimer - timeSinceLastKey;
-	var humanTime = msToTime(timeUntilNext);
-
-	// Check to see if sufficient time has passed.
-	if (timeSinceLastKey >= winTimer) {
-
-		var bossKeyList = dbBossKeys.getData("/keys");
-
-		if(bossKeyList.length > 0){
-			var winRandomizer = Math.floor(Math.random()*bossKeyList.length);
-			var winKey = bossKeyList[winRandomizer];
-			var bossName = winKey.name;
-			var bossStrength = winKey.strength;
-			var bossGuile = winKey.guile;
-			var bossMagic = winKey.magic;
-
-			try {
-				var playerStrength = dbPlayers.getData("/" + username + "/stats/strength");
-				var playerGuile = dbPlayers.getData("/" + username + "/stats/guile");
-				var playerMagic = dbPlayers.getData("/" + username + "/stats/magic");
-			} catch (error){
-				var playerStrength = 0;
-				var playerGuile = 0;
-				var playerMagic = 0;
-			}
-			
-			var raidParty = '{"name": "'+username+'", "strength": ' + playerStrength + ', "guile": ' + playerGuile + ', "magic": ' + playerMagic + '}';
-			var bossMonster = '{"name":"' + bossName + '", "strength": ' + bossStrength + ', "guile": ' + bossGuile + ', "magic": ' + bossMagic + '}';
-
-			var combatResults = rpgCombat(raidParty, bossMonster, 1);
-			if( combatResults == username ){
-				// Player won! Give them a key, remove it from DB, announce the win!
-				var bossGameName = winKey.gameName;
-				var bossGameKey = winKey.key;
-				var bossShortName = winKey.shortname;
-
-				dbPlayers.push("/" + username + "/lastSeen/bossKey", date);
-				wss.broadcast('{"uname": "' + username + '", "event": "boss", "bossName": "' + bossName + '", "bossGame": "'+bossGameName+'"}');
-				sendBroadcast(username + " defeated the "+bossName+" boss and received a key for "+bossGameName+"!");
-				sendWhisper(username, "You defeated the boss and won a key! Reward: "+bossGameName+" "+ bossGameKey + ".");
-				dbBossKeys.delete("/keys["+winRandomizer+"]");
-			} else {
-				// Player lost. Points for the points god!
-				sendWhisper(username, "You were defeated by the "+bossName+"! Try again!");
-			}
-		} else {
-			// Out of keys! Refund points.
-			addPoints(userid, 1000);
-			sendWhisper(username, "All of the bosses are dead! Here is a refund.");
-		}
-	} else {
-		// Player won within the last X amount of time. Refund points.
-		addPoints(userid, 1000);
-		sendWhisper(username, "You won recently. Try again in " + humanTime + ".");
 	}
 }
 
@@ -1575,8 +1494,175 @@ function rpgPlayerDuel(username, userid, rawcommand){
 	}
 }
 
+// RPG Trivia Duel
+// This allows users to trivia battle for coins.
+function rpgTriviaDuel(username, userid, rawcommand){
+	var isAllowed = dbSettings.getData("/triviaDuel/active");
+
+	if (isAllowed === true){
+		var commandArray = (rawcommand).split(" ");
+		var pointsBet = commandArray[1];
+		var inProgress = dbGame.getData("/triviaDuel/settings/inProgress");
+		var awaitingAnswer = dbGame.getData("/triviaDuel/settings/awaitingAnswer");
+
+		// If points bet is a number and greater than zero, proceed to check to see if they have enough points. If they do, see if question needs and answer or not.
+		if ( isNaN(pointsBet) === false && pointsBet > 0 && awaitingAnswer === false|| inProgress === true && awaitingAnswer === false){
+			var pointsBet = parseInt(pointsBet);
+			request('https://api.scottybot.net/api/points?authkey=' + rpgApp.scottyauth +'&userid='+userid, function(error, response, body) {
+				if (!error && response.statusCode == 200) {
+					// Great, this person exists!
+					var jsonparse = JSON.parse(body);
+					var pointsTotal = jsonparse.points;
+					var minimumBet = dbSettings.getData("/triviaDuel/minBet");
+					var expire = dbGame.getData("/triviaDuel/settings/expireTime");
+					var currentBet = dbGame.getData("/triviaDuel/settings/amount");
+					var playerOneName = dbGame.getData('/triviaDuel/playerOne/name');
+
+					var date = new Date().getTime();
+					var expireCheck = date - expire;
+
+					// Check to see if a duel is in progress and make sure the player doesn't fight themselves and has money to back their bet.
+					if (inProgress === true && pointsTotal >= currentBet && expireCheck <= 30000 && playerOneName !== username){
+						// Push all of their info to the duel arena.
+						dbGame.push("/triviaDuel/playerTwo/name", username);
+						dbGame.push("/triviaDuel/playerTwo/userid", userid);
+						
+						// Take number of points that were bet from both players.
+						var playerOneID = dbGame.getData('/triviaDuel/playerOne/userid');
+						deletePoints(playerOneID, currentBet);
+						deletePoints(userid, currentBet);
+
+						// Combat stuff goes here because duel was started with two people.
+						var triviaCategoryArray = [10, 15, 17, 16, 20, 27];
+						var triviaCategory = triviaCategoryArray[Math.floor(Math.random()*triviaCategoryArray.length)];
+						request('http://www.opentdb.com/api.php?amount=1&category='+triviaCategory, function(error, response, body) {
+							if (!error && response.statusCode == 200) {
+								console.log(body);
+								var body = JSON.parse(body);
+								var result = body.results;
+								var trivia = result[0];
+								var category = parseHtml(trivia.category);
+								var question = parseHtml(trivia.question);
+								var correctAnswer = parseHtml(trivia.correct_answer);
+								var incorrectAnswer = trivia.incorrect_answers;
+								var answerArray = [];
+								
+								// Push correct answer to array.
+								answerArray.push(correctAnswer);
+								// Push incorrect answers into answer array.
+								for (var i=0, len=incorrectAnswer.length; i < len; i++) {
+									answerArray.push( parseHtml(incorrectAnswer[i]) );
+								}
+								
+								// Push all answers to DB for comparison
+								dbGame.push("/triviaDuel/settings/correct", correctAnswer);
+								dbGame.push("/triviaDuel/settings/answers", answerArray);
+								
+								// Broadcast question.
+								var answers = shuffle( dbGame.getData("/triviaDuel/settings/answers") );
+								var playerOne = dbGame.getData('/triviaDuel/playerOne/name');
+								var playerTwo = dbGame.getData('/triviaDuel/playerTwo/name');
+								sendWhisper(playerOne, "A battle of wits in related to: "+category+".");
+								sendWhisper(playerTwo, "A battle of wits in related to: "+category+".");
+								sendWhisper(playerOne, question+" Answers: " +answers);
+								sendWhisper(playerTwo, question+" Answers: " +answers);
+								
+								// Set to awaiting answer.
+								dbGame.push("/triviaDuel/settings/awaitingAnswer", true);
+							
+							} else {
+								sendWhisper(playerOne, "There was an error getting a question. You have been refunded.");
+								sendWhisper(playerTwo, "There was an error getting a question. You have been refunded.");
+								var playerOne = dbGame.getData("/triviaDuel/playerOne");
+								var playerOneID = playerOne.userid;
+								var playerTwo = dbGame.getData("/triviaDuel/playerTwo");
+								var playerTwoID = playerTwo.userid;
+								var betAmount = dbGame.getData("/triviaDuel/settings/amount");
+								addPoints(playerOneID, betAmount);
+								addPoints(playerTwoID, betAmount);
+							}							
+						});
+
+					} else if ( pointsBet <= pointsTotal && pointsBet >= minimumBet && playerOneName !== username && expireCheck >= 30000) {
+						// No duel started, so gather up info and push to duel arena.
+						dbGame.push("/triviaDuel/playerOne/name", username);
+						dbGame.push("/triviaDuel/playerOne/userid", userid);
+						dbGame.push("/triviaDuel/settings/amount", pointsBet);
+						dbGame.push("/triviaDuel/settings/expireTime", date);
+						dbGame.push("/triviaDuel/settings/inProgress", true);
+						dbGame.push("/triviaDuel/settings/awaitingAnswer", false);
+						
+						// Broadcast that a duelist is waiting for a challenger.
+						sendBroadcast(username+" has bet "+pointsBet+" on a wizard duel of minds. Type !rpg-trivia to accept the challenge. Expires: 30 sec.");
+
+					} else if ( playerOneName == username && expireCheck <= 30000){
+						// User is already entered in duel and still waiting on challenger.
+						sendWhisper(username, "Stop hitting yourself! You are already entered in the arena.");
+					} else if (pointsBet >= pointsTotal || pointsTotal <= currentBet || pointsBet < minimumBet ) {
+						// Person doesn't have enough points to participate or bet below the minimum.
+						sendWhisper(username, "You do not have enough coins or you bet below the minimum "+minimumBet+" coins.");
+					} else if (expireCheck >= 30000 && pointsBet >= minimumBet){
+						// Duel time expired. Refund waiting duelist and reset game.
+						var playerOne = dbGame.getData("/triviaDuel/playerOne");
+						var betAmount = dbGame.getData("/triviaDuel/settings/amount");
+						var playerOneID = playerOne.userid;
+						console.log('Arena Expired. Starting new arena.');
+						dbGame.delete("/triviaDuel/playerOne");
+						dbGame.delete("/triviaDuel/playerTwo");
+						dbGame.push("/triviaDuel/playerOne/name", "none");
+						addPoints(playerOneID, betAmount);
+						rpgTriviaDuel(username, userid, rawcommand);
+					} else {
+						console.log('trivia duel error!');
+					}
+				} else {
+					// Some type of error where I couldn't find points for the user.
+					console.log('Could not retrieve scottybot points for '+username, userid);
+					sendWhisper(username, "Error! There was an issue with connecting to scottybot.");
+				}
+			})
+		} else if (awaitingAnswer === true){
+			var playerOneName = dbGame.getData("/triviaDuel/playerOne/name");
+			var playerTwoName = dbGame.getData("/triviaDuel/playerTwo/name");
+			if (username == playerOneName || username == playerTwoName){
+				var commandArray = (rawcommand).split("!rpg-trivia ");
+				var playerAnswer = commandArray[1];
+				var correctAnswer = dbGame.getData("/triviaDuel/settings/correct");
+				var betAmount = dbGame.getData("/triviaDuel/settings/amount");
+				var reward = betAmount * 2;
+				
+				if( playerAnswer.toUpperCase() == correctAnswer.toUpperCase() ){
+					sendWhisper(playerOneName, username+" won the battle of wits! Reward: "+reward+" coins.");
+					sendWhisper(playerTwoName, username+" won the battle of wits! Reward: "+reward+" coins.");
+					addPoints(userid, reward);
+					// Reset Game
+					dbGame.delete("/triviaDuel/playerOne");
+					dbGame.delete("/triviaDuel/playerTwo");
+					dbGame.push("/triviaDuel/playerOne/name", "none");
+					dbGame.push("/triviaDuel/settings/inProgress", false);
+					dbGame.push("/triviaDuel/settings/awaitingAnswer", false);
+					dbGame.push("/triviaDuel/settings/expireTime", 0);
+					dbGame.push("/triviaDuel/settings/amount", 0);
+				} else {
+					sendWhisper(username, "Incorrect answer!");
+				}
+				
+			} else {
+				sendWhisper(username, "You're not in this duel!");
+			}			
+		}else {
+			// Someone typed in a command with some gibberish on the end.
+			sendWhisper(username, "Invalid command. Try !rpg-trivia (number)");
+		}
+	} else {
+		sendWhisper(username, "This command is currently deactivated.");
+	}
+}
+
+
+
 // Shop Item Generation
-// This generates items on bot start so that they can be purchased from the shop by players.
+// This generates items in the shop.
 function rpgShopLoop(){
 	
 	request('https://beam.pro/api/v1/chats/'+rpgApp.chanID+'/users', function(error, response, body) {
@@ -1787,267 +1873,52 @@ function rpgShopPurchase(username, userid, rawcommand){
 		}
 };
 
-
-
-
-////////////////////////
-// Interactive Setup
-///////////////////////
-function beamInteractiveLauncher(channelid, username, password){
-	const Beam = require('beam-client-node');
-	const Interactive = require('beam-interactive-node');
-	const rjs = require('robotjs');
-
-	var channelId = channelid;
-	var username = username;
-	var password = password;
-
-	// Connects to interactive
-	const beam = new Beam();
-	beam.use('password', {
-		username,
-		password,
-	})
-	.attempt()
-	.then(() => beam.game.join(channelId))
-	.then(res => createRobot(res))
-	.then(robot => performRobotHandShake(robot))
-	.then(robot => setupRobotEvents(robot))
-	.catch(err => {
-		console.log(err.message);
-		if (err.res) {
-			throw new Error('Error connecting to Interactive:' + err.res.body.mesage);
-		}
-		throw new Error('Error connecting to Interactive', err);
-	});
-
-	// Creating Robot
-	function createRobot(res, stream) {
-		return new Interactive.Robot({
-			remote: res.body.address,
-			channel: channelId,
-			key: res.body.key,
-		});
-	}
-
-	// Robot Handshake
-	function performRobotHandShake (robot) {
-		return new Promise((resolve, reject) => {
-			robot.handshake(err => {
-				if (err) {
-					reject(err);
-				}
-				resolve(robot);
-			});
-		});
-	}
-}
-if (rpgApp.interactive === true){
-	beamInteractiveLauncher(dbSettings.getData("/beamInteractive/channelID"), dbSettings.getData("/beamInteractive/username"), dbSettings.getData("/beamInteractive/password"));
-	console.log("Beam Interactive is turned on.");
-} else {
-	console.log("Beam Interactive is turned off.");
-}
-
-// Robot Events
-function setupRobotEvents (robot) {
-	var Packets = require('beam-interactive-node/dist/robot/packets').default;
-
-    robot.on('report', report => {
-		//console.log(report.screen);
-		
-		for( i = 0; i < report.screen.length; i++){
-			
-			if (report.screen.length > 0 && report.screen[i].clicks > 0) {
-				const mean = report.screen[i].coordMean;
-				var clickHorizontal = 1920*mean.x;
-				var clickVertical = 1080*mean.y;
-				var clicks = report.screen[i].clicks;
-				//console.log(clickHorizontal, clickVertical, clicks);
-				wss.broadcast('{ "event": "mouseclick",  "mousex": '+clickHorizontal+', "mousey": '+clickVertical+', "clicks": '+clicks+'}');
-			}
-			
-		}
-
-		if (report.tactile.length > 0){
-			for( i = 0; i < report.tactile.length; i++){
-				var tactile = report.tactile[i];
-				if (tactile.pressFrequency > 0 && isNaN(tactile.pressFrequency) === false){
-					if ( tactile.id === 1){
-						// RPG Command
-						console.log('Someone pushed the !rpg button.');
-						var progress = {
-							"tactile": [{
-								"id": 1, 
-								"cooldown": 300000, 
-								"fired": true
-							}]
-						};
-						sendBroadcast("Want to play? Try these commands: " + rpgApp.rpgCommands + ".");
-					} else if (tactile.id === 2){
-						// Give all 50
-						console.log('Someone pushed the 50 coins button.');
-						sendBroadcast("A generous patron has given everyone 50 coins!");
-						giveallPoints(50);
-						var progress = {
-							"tactile": [
-							{
-								"id": 2, 
-								"cooldown": 300000, 
-								"fired": true
-							},
-							{
-								"id": 3, 
-								"cooldown": 300000, 
-								"fired": true
-							},
-							{
-								"id": 4, 
-								"cooldown": 300000, 
-								"fired": true
-							}
-							]
-						};
-					} else if (tactile.id === 3){
-						// Give all 100
-						console.log('Someone pushed the 100 coins button.');
-						sendBroadcast("A wealthy patron has given everyone 100 coins!");
-						giveallPoints(100);
-						var progress = {
-							"tactile": [
-							{
-								"id": 2, 
-								"cooldown": 300000, 
-								"fired": true
-							},
-							{
-								"id": 3, 
-								"cooldown": 300000, 
-								"fired": true
-							},
-							{
-								"id": 4, 
-								"cooldown": 300000, 
-								"fired": true
-							}
-							]
-						};
-					} else if (tactile.id === 4){
-						// Give all 200
-						console.log('Someone pushed the 200 coins button.');
-						sendBroadcast("The King of Cointown has given everyone 200 coins.");
-						giveallPoints(200);
-						var progress = {
-							"tactile": [
-							{
-								"id": 2, 
-								"cooldown": 300000, 
-								"fired": true
-							},
-							{
-								"id": 3, 
-								"cooldown": 300000, 
-								"fired": true
-							},
-							{
-								"id": 4, 
-								"cooldown": 300000, 
-								"fired": true
-							}
-							]
-						};
-					} else if (tactile.id === 5){
-						// Restock Shop
-						console.log('Someone pushed the restock shop button.');
-						var progress = {
-							"tactile": [{
-								"id": 5, 
-								"cooldown": 120000, 
-								"fired": true
-							}]
-						};
-						sendBroadcast("An angry customer has demanded the shop restock items!");
-						rpgShopLoop();
-					} else if (tactile.id === 6){
-						// Boss Battle
-						console.log('Someone pushed the boss battle button.');
-						sendBroadcast("Scouts report a monster is approaching the city and will be here in 5 seconds. Prepare to fight!");
-						setTimeout(function(){ 
-							bossFightStart(); 
-						}, 5000);
-						var progress = {
-							"tactile": [{
-								"id": 6, 
-								"cooldown": 300000, 
-								"fired": true
-							}]
-						};
-					}
-
-					// Send Progress Report
-					robot.send( new Packets.ProgressUpdate(progress));
-				}
-			}
-		};
-
-    });
-    robot.on('error', err => {
-        throw new Error('There was an error in the Interactive connection', err);
-    });
-}
-
-////////////////////////
-// Interactive Games
-///////////////////////
-function bossFightStart(){
-	// Pick a boss at random from DB.
-	var beamUsername = dbSettings.getData("/beamInteractive/username");
-	var bossList = dbMonsters.getData("/bossFight");
-	var boss = bossList[Math.floor(Math.random() * bossList.length)];
-	var bossName = boss.name;
-	var bossClicksRaw = boss.clicksPerPerson;
-	var reward = boss.reward;
-	request('https://beam.pro/api/v1/channels/'+beamUsername+'?fields=viewersCurrent', function(error, response, body) {
-		if (!error && response.statusCode == 200) {
-			var data = JSON.parse(body);
-			var viewers = data.viewersCurrent;
-			if(viewers === 0 ){
-				var bossClicks = bossClicksRaw;
-			} else {
-				var bossClicks = bossClicksRaw * viewers;
-			}
-			console.log("Boss fight started against a "+bossName+" with "+viewers+" viewers.");
-			// Save boss to DB area to compare against after fight. Calculate required clicks based on viewer count.
-			dbGame.push("/bossFight/name", bossName);
-			dbGame.push("/bossFight/clicksNeeded", bossClicks);
-			dbGame.push("/bossFight/reward", reward);
-			dbGame.push("/bossFight/defeated", false);
-			
-			sendBroadcast("A wild "+bossName+" has appeared requiring "+bossClicks+" clicks to kill. Click it to death!");
-			wss.broadcast('{ "event": "bossFight", "name": "'+bossName+'"}');	
-		}else{
-			console.log('Error contacting beam api. Canceling boss fight.');
-		}
-	});
-}
-function bossFightEnd(timesClicked){
-	// Check against saved boss to see if number of clicks reached.
-	var bossName = dbGame.getData("/bossFight/name");
-	var bossClicksNeeded = dbGame.getData("/bossFight/clicksNeeded");
-	var reward = dbGame.getData("/bossFight/reward");
-	var defeated = dbGame.getData("/bossFight/defeated");
+// RPG Training
+// This allows the user to spend coins to permanent gain a stat point.
+function rpgTraining(username, userid){
+	var mission = rpgApp.training[Math.floor(Math.random() * rpgApp.training.length)];
+	var missionText = mission.text;
+	var missionStrength = mission.strength;
+	var missionGuile = mission.guile;
+	var missionMagic = mission.magic;
+	var missionCoin = mission.coins;
+	var missionItem = mission.item;
 	
-	// Did they get enough clicks?
-	if (timesClicked >= bossClicksNeeded && defeated === false){
-		// Win!
-		console.log('Players killed the '+bossName+'.');
-		sendBroadcast("The "+bossName+" was defeated ("+timesClicked+"/"+bossClicksNeeded+")! Everyone gets "+reward+" coins.");
-		giveallPoints(reward);
-		dbGame.push("/bossFight/defeated", true);
-	} else if (timesClicked < bossClicksNeeded && defeated === false) {
-		// Fail!
-		console.log('Players lost to the '+bossName+'.');
-		sendBroadcast("The "+bossName+" has destroyed the party ("+timesClicked+"/"+bossClicksNeeded+"). Everyone meets at the tavern for a sad drink.")
-		dbGame.push("/bossFight/defeated", true);
-	}	
+	try {
+		var strength = dbPlayers.getData("/" + username + "/prowess/strength");
+	} catch (error) {
+		var strength = 0;
+	}
+	try {
+		var guile = dbPlayers.getData("/" + username + "/prowess/guile");
+	} catch (error) {
+		var guile = 0;
+	}
+	try {
+		var magic = dbPlayers.getData("/" + username + "/prowess/magic");
+	} catch (error) {
+		var magic = 0;
+	}
+	
+	// If mission gives stats...
+	if (missionStrength > 0 || missionGuile > 0 || missionMagic > 0){
+		var newStrength = strength + missionStrength;
+		var newGuile = guile + missionGuile;
+		var newMagic = magic + missionMagic;
+		dbPlayers.push("/" + username + "/prowess/strength", newStrength);
+		dbPlayers.push("/" + username + "/prowess/guile", newGuile);
+		dbPlayers.push("/" + username + "/prowess/magic", newMagic);
+		characterStats(username);
+	}
+	
+	// If mission gives coins...
+	if (missionCoin > 0){
+		addPoints(userid, missionCoin);
+	}
+
+	// Send a whisper about what happened.
+	var missionText = missionText+" || Prowess:("+missionStrength+"/"+missionGuile+"/"+missionMagic+") || "+missionCoin+" coins.";
+	sendWhisper(username, missionText);
 }
+
+//

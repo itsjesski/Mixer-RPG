@@ -278,11 +278,12 @@ function shuffle(array) {
 
 // Parse Trivia HTML Nonsense
 // Parses trival stuff.
-function parseHtml(str) {
-    return str.replace(/&#([0-9]{1,3});/gi, function(match, numStr) {
-        var num = parseInt(numStr, 10); // read num as normal number
-        return String.fromCharCode(num);
-    });
+function parseHtml(safe) {
+    return safe.replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'");
 }
 
 // Millisecond to Human Converter

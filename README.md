@@ -14,7 +14,7 @@ Getting Started: <br>
 10. After that is done type npm start.
 
 Scotty Commands: <br>
-  - !rpg : (_null_)
+  - !rpg : (\_null\_)
   - !rpg-adventure : (_null_) : Recommend to set a cost.
   - !rpg-arena : (_null_)(_bpcd_)
   - !rpg-daily : (_null_)(_bpcd_) : Set reward in settings file.
@@ -37,7 +37,7 @@ Command Details:
 - Trivia : Allows two users to duel with a battle of wits. First to answer the trivia correctly gets coins. (IN TESTING)
 - Raid: Allows a mod to kick off a raid against another streamer. Gives people a chance to get a trophy named after the raid target before posting a link to their channel.
 
-Combat System:
+Combat System: <br>
 Combat works in three rounds. Each round a random stat is picked, strength, guile, or magic and both players fight using that stat. A die is rolled and added on to each state before determining the winner.
   
 FAQ:

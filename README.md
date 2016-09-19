@@ -15,17 +15,17 @@ Getting Started: <br>
 
 Scotty Commands: <br>
   - !rpg : (\_null\_)
-  - !rpg-adventure : (_null_) : Recommend to set a cost.
-  - !rpg-arena : (_null_)(_bpcd_)
-  - !rpg-daily : (_null_)(_bpcd_) : Set reward in settings file.
-  - !rpg-duel : (_null_)(_bpcd_)
-  - !rpg-equip : (_null_)(_bpcd_)
-  - !rpg-inventory : (_null_)(_bpcd_)
-  - !rpg-raid : (_null_)(_bpcd_)
-  - !rpg-shop : (_null_)(_bpcd_)
-  - !rpg-shop-refresh :  (_null_)(_bpcd_) : Recommend to set cost.
-  - !rpg-training :  (_null_)(_bpcd_) : Recommend to set high cost.
-  - rpg-trivia :  (_null_)(_bpcd_)
+  - !rpg-adventure : (\_null\_) : Recommend to set a cost.
+  - !rpg-arena : (\_null\_)(\_bpcd\_)
+  - !rpg-daily : (\_null\_)(\_bpcd\_) : Set reward in settings file.
+  - !rpg-duel : (\_null\_)(\_bpcd\_)
+  - !rpg-equip : (\_null\_)(\_bpcd\_)
+  - !rpg-inventory : (\_null\_)(\_bpcd\_)
+  - !rpg-raid : (\_null\_)(\_bpcd\_)
+  - !rpg-shop : (\_null\_)(\_bpcd\_)
+  - !rpg-shop-refresh :  (\_null\_)(\_bpcd\_) : Recommend to set cost.
+  - !rpg-training :  (\_null\_)(\_bpcd\_) : Recommend to set high cost.
+  - rpg-trivia :  (\_null\_)(\_bpcd\_)
   - Optional repeating command that tells people to try the !rpg command. <br>
 
 Command Details:

@@ -31,14 +31,14 @@ Scotty Commands: <br>
 Command Details:
 - Arena : Allows two users to duel each other using only their companion, similar to pokemon battles. Useful for new players to duel high level players.
 - Dueling : Allows two players to duel each other with full equipment and stats.
-- Training : Allows a player to go on a training mission and increase a permanent state called prowess. Useful for point dumbs when equipment is maxed.
+- Training : Allows a player to go on a training mission and increase a permanent stat called prowess. Useful for point dumps when equipment is maxed.
 - Shop : Allows users to purchase a randomly generated item from a shop keeper. They can also pay to refresh the shop with new items.
 - Adventure : Allows the user to go on adventure to get new equipment at random.
 - Trivia : Allows two users to duel with a battle of wits. First to answer the trivia correctly gets coins. (IN TESTING)
 - Raid: Allows a mod to kick off a raid against another streamer. Gives people a chance to get a trophy named after the raid target before posting a link to their channel.
 
 Combat System:
-Combat works in three rounds. Each round a random stat is picked, strength, guile, or magic and both players fight using that stat. A dice is rolled and added on to each state before determining the winner.
+Combat works in three rounds. Each round a random stat is picked, strength, guile, or magic and both players fight using that stat. A die is rolled and added on to each state before determining the winner.
   
 FAQ:
 - If someone runs an !rpg command and it does not show as in the node window that means the command was not created in the scotty gui.

@@ -21,7 +21,7 @@ var dbMissions = new JsonDB("db/missions", true, true);
 // Basic app variables used with game.
 rpgApp = {
 	scottyauth: dbAuth.getData("/scottyauth"),
-	rpgCommands: "!coins, !rpg-inventory, !rpg-daily, !rpg-adventure (cost: 500), !rpg-training (cost: 2000) !rpg-arena (bet), !rpg-duel (bet), !rpg-shop, !rpg-shop-refresh (cost: 750)",
+	rpgCommands: "!coins, !rpg-inventory, !rpg-daily, !rpg-adventure (cost: 500), !rpg-training (cost: 2000) !rpg-arena (bet), !rpg-duel (bet), !rpg-trivia (bet), !rpg-shop, !rpg-shop-refresh (cost: 750)",
 	raidTimer: dbSettings.getData("/raid/timer"),
 	cmdCooldownActive: false,
 	raidActive: false,

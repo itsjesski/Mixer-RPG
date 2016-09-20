@@ -279,11 +279,11 @@ function shuffle(array) {
 // Parse Trivia HTML Nonsense
 // Parses trival stuff.
 function parseHtml(safe) {
-    return safe.replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#039;/g, "'");
+    return safe.replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, "'")
+        .replace(/&#039;/g, '"');
 }
 
 // Millisecond to Human Converter
@@ -1527,11 +1527,6 @@ function rpgTriviaDuel(username, userid, rawcommand){
 						// Push all of their info to the duel arena.
 						dbGame.push("/triviaDuel/playerTwo/name", username);
 						dbGame.push("/triviaDuel/playerTwo/userid", userid);
-						
-						// Take number of points that were bet from both players.
-						var playerOneID = dbGame.getData('/triviaDuel/playerOne/userid');
-						deletePoints(playerOneID, currentBet);
-						deletePoints(userid, currentBet);
 
 						// Combat stuff goes here because duel was started with two people.
 						var triviaCategoryArray = [10, 15, 17, 16, 20, 27];
@@ -1542,9 +1537,13 @@ function rpgTriviaDuel(username, userid, rawcommand){
 								var body = JSON.parse(body);
 								var result = body.results;
 								var trivia = result[0];
-								var category = parseHtml(trivia.category);
-								var question = parseHtml(trivia.question);
-								var correctAnswer = parseHtml(trivia.correct_answer);
+								var categoryOrig = trivia.category;
+								var category = parseHtml(categoryOrig);
+								var questionOrig = trivia.question;
+								var question = parseHtml(questionOrig);
+								var correctAnswerOrig = trivia.correct_answer;
+								var correctAnswer = parseHtml(correctAnswerOrig);
+
 								var incorrectAnswer = trivia.incorrect_answers;
 								var answerArray = [];
 								
@@ -1552,7 +1551,9 @@ function rpgTriviaDuel(username, userid, rawcommand){
 								answerArray.push(correctAnswer);
 								// Push incorrect answers into answer array.
 								for (var i=0, len=incorrectAnswer.length; i < len; i++) {
-									answerArray.push( parseHtml(incorrectAnswer[i]) );
+									var answerOrig = incorrectAnswer[i];
+									var answer = parseHtml(answerOrig);
+									answerArray.push(answer);
 								}
 								
 								// Push all answers to DB for comparison
@@ -1563,13 +1564,16 @@ function rpgTriviaDuel(username, userid, rawcommand){
 								var answers = shuffle( dbGame.getData("/triviaDuel/settings/answers") );
 								var playerOne = dbGame.getData('/triviaDuel/playerOne/name');
 								var playerTwo = dbGame.getData('/triviaDuel/playerTwo/name');
-								sendWhisper(playerOne, "A battle of wits in related to: "+category+".");
-								sendWhisper(playerTwo, "A battle of wits in related to: "+category+".");
-								sendWhisper(playerOne, question+" Answers: " +answers);
-								sendWhisper(playerTwo, question+" Answers: " +answers);
+								sendWhisper(playerOne, category+" || "+question+" || Answers: " +answers);
+								sendWhisper(playerTwo, category+" || "+question+" || Answers: " +answers);
 								
 								// Set to awaiting answer.
 								dbGame.push("/triviaDuel/settings/awaitingAnswer", true);
+
+								// Take number of points that were bet from both players.
+								var playerOneID = dbGame.getData('/triviaDuel/playerOne/userid');
+								deletePoints(playerOneID, currentBet);
+								deletePoints(userid, currentBet);
 							
 							} else {
 								sendWhisper(playerOne, "There was an error getting a question. You have been refunded.");

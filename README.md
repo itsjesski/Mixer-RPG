@@ -1,6 +1,9 @@
 # Beam-RPG-Scotty
 This is a chat based RPG for beam.pro that runs using scottybot and node.js. It allows users in chat to go on adventures, quests, raids, and many other things and saves character data to a json db.
 
+## Can I use this on my Beam channel?
+Yes, but I can't provide support in getting it started or fixing errors. 
+
 Getting Started: <br>
 1. Install node from https://nodejs.org/en/ <br>
 2. Download this RPG onto your desktop.<br>
@@ -25,7 +28,6 @@ Scotty Commands: <br>
   - !rpg-shop : (\_null\_)(\_bpcd\_)
   - !rpg-shop-refresh :  (\_null\_)(\_bpcd\_) : Recommend to set cost.
   - !rpg-training :  (\_null\_)(\_bpcd\_) : Recommend to set high cost.
-  - rpg-trivia :  (\_null\_)(\_bpcd\_)
   - Optional repeating command that tells people to try the !rpg command. <br>
 
 Command Details:
@@ -34,7 +36,6 @@ Command Details:
 - Training : Allows a player to go on a training mission and increase a permanent stat called prowess. Useful for point dumps when equipment is maxed.
 - Shop : Allows users to purchase a randomly generated item from a shop keeper. They can also pay to refresh the shop with new items.
 - Adventure : Allows the user to go on adventure to get new equipment at random.
-- Trivia : Allows two users to duel with a battle of wits. First to answer the trivia correctly gets coins. (IN TESTING)
 - Raid: Allows a mod to kick off a raid against another streamer. Gives people a chance to get a trophy named after the raid target before posting a link to their channel.
 
 Combat System: <br>

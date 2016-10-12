@@ -4,7 +4,7 @@ This is a chat based RPG for beam.pro that runs using scottybot and node.js. It 
 ## Can I use this on my Beam channel?
 Yes, but I can't provide support in getting it started or fixing errors. 
 
-Getting Started: <br>
+## Getting Started: <br>
 1. Install node from https://nodejs.org/en/ <br>
 2. Download this RPG onto your desktop.<br>
 3. Go into beam-rpg/db/settings.json <br>

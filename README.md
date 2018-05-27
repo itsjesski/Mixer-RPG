@@ -23,7 +23,13 @@ Yes, but I can't provide support in getting it started or fixing errors.
 3. After that is done type npm start.<br>
 4. Done.
 
-Commands: <br>
+## How do I get updates?: <br>
+This does not have an auto update system. You'll have to ask Firebottle if there is an update. If there is, download the app again and overwrite your current folder EXCEPT for the players.json file. Players.json is where all of your players user data is stored.
+
+## How do I edit weapon names, training stories, etc?## <br>
+All of the .json files in the DB folder are filled with this information. All you need to do is edit these files. Note that if/when you update this information could be overwritten.
+
+##Commands:## <br>
   - !rpg
   - !rpg-adventure
   - !rpg-arena
@@ -50,3 +56,4 @@ Combat works in three rounds. Each round a random stat is picked, strength, guil
 FAQ:
 - This is in the early alpha stage. I can't do much in the way of support for this currently.
 - No, this does not have a user interface. If you're not comforterable with command windows this could be hard to get started.
+- Do you have plans to give this a gui, make points hourly, etc? Yes, but it'll be a bit. When this happens it'll probably be Firebot centric.

@@ -187,7 +187,7 @@ class MinimalMixerChatClient {
 
 
 ///////////////////////////////
-// (Not) Scotty Command Center  
+// Command Center  
 ///////////////////////////////
 
 function getRawChatMessage(chatEvent){
@@ -336,7 +336,8 @@ function getPoints(userid){
 
 // Delete Coins
 function deletePoints(userid, coins){
-	let currentCoins;
+	let currentCoins,
+		newCoins;
 	try{
 		currentCoins = dbPlayers.getData('/'+userid+'/coins');
 		dbPlayers.push('/'+userid+'/coins', currentCoins - coins);
@@ -1303,6 +1304,8 @@ function rpgAdventure(username, userid) {
 			//Coins
 			buyCoins(username, userid);
 		}
+
+		deletePoints(userid, settings.cost);
 	} else {
 		sendWhisper(username, 'You do not have enough coins for this, or adventure is deactivated.');
 	}

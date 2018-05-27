@@ -1,1 +1,3 @@
-beam-rpg/node_modules/
+node_modules/
+
+db/authTokensDoNotShow\.json

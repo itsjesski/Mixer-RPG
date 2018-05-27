@@ -1,0 +1,59 @@
+{
+    "companionDuel": {
+        "settings": {
+            "inProgress": true,
+            "amount": 10000,
+            "expireTime": 1527384894924
+        },
+        "playerOne": {
+            "name": "RaKlavin",
+            "userid": 70845,
+            "companionName": "Mystic Galloping Pig",
+            "companionStrength": 11,
+            "companionGuile": 12,
+            "companionMagic": 7
+        }
+    },
+    "playerDuel": {
+        "settings": {
+            "inProgress": false,
+            "amount": 0,
+            "expireTime": 0
+        },
+        "playerOne": {
+            "name": "none"
+        }
+    },
+    "shop": {
+        "item1": {
+            "price": "sold",
+            "itemName": "Twisted Shimmering Shuriken",
+            "strength": 3,
+            "guile": 11,
+            "magic": 16,
+            "slot": "ranged"
+        },
+        "item2": {
+            "itemName": "TheRedMenace's Hat",
+            "strength": 1,
+            "guile": 5,
+            "magic": 5,
+            "price": 1361,
+            "slot": "trophy"
+        },
+        "item3": {
+            "itemName": "Aged Blue Ballista",
+            "strength": 12,
+            "guile": 8,
+            "magic": 10,
+            "price": 2278,
+            "slot": "ranged"
+        }
+    },
+    "bossFight": {
+        "name": "Beholder",
+        "clicksNeeded": 390,
+        "reward": 350,
+        "defeated": true
+    }
+}

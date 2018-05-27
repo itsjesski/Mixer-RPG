@@ -1,0 +1,22 @@
+{
+  "name": "mixer-rpg",
+  "version": "2.0.0",
+  "description": "An rpg chat bot for Mixer",
+  "main": "app.js",
+  "dependencies": {
+    "beam-client-node": "^2.0.0",
+    "beam-interactive-node2": "^2.8.4",
+    "install": "^0.11.0",
+    "mixer-shortcode-oauth": "^1.0.3",
+    "node-json-db": "^0.7.3",
+    "request": "^2.75.0",
+    "roll": "^1.1.0",
+    "ws": "^5.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "@firebottletv",
+  "license": "MIT"
+}

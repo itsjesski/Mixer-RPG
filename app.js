@@ -26,7 +26,7 @@ let socket;
 // Basic app variables used with game.
 rpgApp = {
 	chanID: dbAuth.getData("/channelID"),
-	rpgCommands: "!coins, !rpg-inventory, !rpg-daily, !rpg-adventure (cost: "+ dbSettings.getData('/adventure/cost') +"), !rpg-training (cost: 2000) !rpg-arena (bet), !rpg-duel (bet), !rpg-shop, !rpg-shop-refresh (cost: 750)",
+	rpgCommands: "!coins, !rpg-inventory, !rpg-daily, !rpg-adventure (cost: "+ dbSettings.getData('/adventure/cost') +"), !rpg-training (cost: "+ dbSettings.getData('/training/cost') +") !rpg-arena (bet), !rpg-duel (bet), !rpg-shop, !rpg-shop-refresh (cost: "+ dbSettings.getData('/shop-refresh/cost') +")",
 	raidTimer: dbSettings.getData("/raid/timer"),
 	cmdCooldownActive: false,
 	raidActive: false,
@@ -253,16 +253,16 @@ function onChatMessage(data){
 	console.log("MixerRPG: " + username + " used command \"" + command + "\".");
 
 	if( dbSettings.getData("/requireWhispers") === true && whisper === true){
-		rpgCommands(username, userid, command, rawcommand, isMod);
+		rpgCommands(username, userid, command, rawcommand, isMod, isStreamer);
 	} else if ( dbSettings.getData("/requireWhispers") === false ) {
-		rpgCommands(username, userid, command, rawcommand, isMod);
+		rpgCommands(username, userid, command, rawcommand, isMod, isStreamer);
 	} else {
 		sendWhisper(username, "Please /whisper "+dbSettings.getData('/botName')+" to run commands.");
 	}
 }
 
 
-function rpgCommands(username, userid, command, rawcommand, isMod){
+function rpgCommands(username, userid, command, rawcommand, isMod, isStreamer){
 	// Commands outside of cooldown.
 	if (command == "!rpg") {
 		sendWhisper(username, "Want to play? Try these commands: " + rpgApp.rpgCommands + ".");
@@ -288,8 +288,7 @@ function rpgCommands(username, userid, command, rawcommand, isMod){
 		rpgShopPurchase(username, userid, rawcommand);
 		dbLastSeen(userid);
 	} else if (command == "!rpg-shop-refresh"){
-		rpgShopLoop();
-		sendBroadcast('A new travelling salesman has come to town! Type !rpg-shop to see his supply.');
+		rpgRefreshShop(username, userid, isStreamer);
 	} else if (command == "!rpg-training"){
 		rpgTraining(username, userid);
 	} else if (command == "!rpg-adventure") {
@@ -1687,9 +1686,12 @@ function rpgPlayerDuel(username, userid, rawcommand){
 
 // Shop Item Generation
 // This generates items in the shop.
-function rpgShopLoop(){
-	
-	request('https://mixer.com/api/v1/chats/'+rpgApp.chanID+'/users', function(error, response, body) {
+function rpgRefreshShop(username, userid, isStreamer){
+	let settings = dbSettings.getData('/shop-refresh');
+	let currentCoins = getPoints(userid);
+
+	if(currentCoins > settings.cost || isStreamer && settings.active === true || isStreamer){
+		request('https://mixer.com/api/v1/chats/'+rpgApp.chanID+'/users', function(error, response, body) {
 			if (!error && response.statusCode == 200) {
 				var data = JSON.parse(body);
 				var user = data[Math.floor(Math.random() * data.length)];
@@ -1704,11 +1706,16 @@ function rpgShopLoop(){
 					dbGame.push("/shop/item"+i+"/price", item.price);
 					dbGame.push("/shop/item"+i+"/slot", item.itemslot);
 				}
+
+				sendBroadcast('A new travelling salesman has come to town! Type !rpg-shop to see his supply.');
 			} else {
 				console.log('Could not access mixer api for store item generation.')
+				sendWhisper(username, "Something went wrong when refreshing the shop.");
 			}
-	});
-	
+		});
+	} else {
+		sendWhisper(username, "You dont not have enough coins to refresh the shop or it is turned off.");
+	}
 }
 function rpgShopGeneration(trophyName){
 	var diceRoller = (dice.roll({

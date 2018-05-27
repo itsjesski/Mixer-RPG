@@ -1840,6 +1840,7 @@ function rpgShopGeneration(trophyName){
 	// Return Item
 	return {"name": itemName, "strength": strengthStat, "guile": guileStat, "magic": magicStat, "price": itemPrice, "itemslot": itemSlot};
 }
+
 function rpgShopPurchase(username, userid, rawcommand){
 		var commandArray = (rawcommand).split(" ");
 		var command = Math.floor(commandArray[1]);
@@ -1887,47 +1888,62 @@ function rpgShopPurchase(username, userid, rawcommand){
 // RPG Training
 // This allows the user to spend coins to permanent gain a stat point.
 function rpgTraining(username, userid){
-	var mission = rpgApp.training[Math.floor(Math.random() * rpgApp.training.length)];
-	var missionText = mission.text;
-	var missionStrength = mission.strength;
-	var missionGuile = mission.guile;
-	var missionMagic = mission.magic;
-	var missionCoin = mission.coins;
-	var missionItem = mission.item;
-	
-	try {
-		var strength = dbPlayers.getData("/" + userid + "/prowess/strength");
-	} catch (error) {
-		var strength = 0;
-	}
-	try {
-		var guile = dbPlayers.getData("/" + userid + "/prowess/guile");
-	} catch (error) {
-		var guile = 0;
-	}
-	try {
-		var magic = dbPlayers.getData("/" + userid + "/prowess/magic");
-	} catch (error) {
-		var magic = 0;
-	}
-	
-	// If mission gives stats...
-	if (missionStrength > 0 || missionGuile > 0 || missionMagic > 0){
-		var newStrength = strength + missionStrength;
-		var newGuile = guile + missionGuile;
-		var newMagic = magic + missionMagic;
-		dbPlayers.push("/" + userid + "/prowess/strength", newStrength);
-		dbPlayers.push("/" + userid + "/prowess/guile", newGuile);
-		dbPlayers.push("/" + userid + "/prowess/magic", newMagic);
-		characterStats(userid);
-	}
-	
-	// If mission gives coins...
-	if (missionCoin > 0){
-		addPoints(userid, missionCoin);
-	}
+	let currentCoin,
+		trainingSettings;
 
-	// Send a whisper about what happened.
-	var missionText = missionText+" || Prowess:("+missionStrength+"/"+missionGuile+"/"+missionMagic+") || "+missionCoin+" coins.";
-	sendWhisper(username, missionText);
+	try{
+		currentCoin = dbPlayers.getData('/'+userid+'/coins');
+		trainingSettings = dbSettings.getData('/training');
+	} catch(err) {
+		sendWhisper('username', "Couldn't find your coin amount. Have you done !rpg-daily yet?");
+		return;
+	}
+	
+	if(currentCoin > trainingSettings.cost && trainingSettings.active === true){
+		var mission = rpgApp.training[Math.floor(Math.random() * rpgApp.training.length)];
+		var missionText = mission.text;
+		var missionStrength = mission.strength;
+		var missionGuile = mission.guile;
+		var missionMagic = mission.magic;
+		var missionCoin = mission.coins;
+		var missionItem = mission.item;
+		
+		try {
+			var strength = dbPlayers.getData("/" + userid + "/prowess/strength");
+		} catch (error) {
+			var strength = 0;
+		}
+		try {
+			var guile = dbPlayers.getData("/" + userid + "/prowess/guile");
+		} catch (error) {
+			var guile = 0;
+		}
+		try {
+			var magic = dbPlayers.getData("/" + userid + "/prowess/magic");
+		} catch (error) {
+			var magic = 0;
+		}
+		
+		// If mission gives stats...
+		if (missionStrength > 0 || missionGuile > 0 || missionMagic > 0){
+			var newStrength = strength + missionStrength;
+			var newGuile = guile + missionGuile;
+			var newMagic = magic + missionMagic;
+			dbPlayers.push("/" + userid + "/prowess/strength", newStrength);
+			dbPlayers.push("/" + userid + "/prowess/guile", newGuile);
+			dbPlayers.push("/" + userid + "/prowess/magic", newMagic);
+			characterStats(userid);
+		}
+		
+		// If mission gives coins...
+		if (missionCoin > 0){
+			addPoints(userid, missionCoin);
+		}
+	
+		// Send a whisper about what happened.
+		var missionText = missionText+" || Prowess:("+missionStrength+"/"+missionGuile+"/"+missionMagic+") || "+missionCoin+" coins.";
+		sendWhisper(username, missionText);
+	} else {
+		sendWhisper(username, "You do not have enough coins to train, or training is turned off.");
+	}
 }

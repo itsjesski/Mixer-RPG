@@ -1,26 +1,26 @@
 {
-    "botName": "Firebot", // Name of your bot.
-    "requireWhispers": false, // Require people to whisper the bot to run commands.
-    "dailyReward": 500, // How many coins a user gets for running !rpg-daily.
-    "adventure":{ // Settings for !rpg-adventure
-        "cost": 500, // How much it costs to go on an adventure.
-        "active": true // If adventures are turned on or not.
+    "botName": "Firebot",
+    "requireWhispers": false,
+    "dailyReward": 500,
+    "adventure":{
+        "cost": 500,
+        "active": true
     },
-    "playerDuel": { // Settings for !rpg-duel
-        "active": true, // If duels are active or not.
-        "minBet": 50 // The minimum bet needed to start a duel.
+    "playerDuel": {
+        "active": true,
+        "minBet": 50
     },
-    "companionDuel": { // Arena battle settings.
-        "active": true, // If arena battles are active or not.
-        "minBet": 50 // Minimum bet needed to start a duel.
+    "companionDuel": {
+        "active": true,
+        "minBet": 50
     },
-    "raid": { // Settings for the raid command.
-        "timer": 30000, // How many seconds to wait before ending the raid.
-        "winReward": 100, // How many coins everyone will get if they win.
-        "loseReward": 50, // How many coins everyone gets if they lose.
-        "raidMessage": "Alright, time for a raid! Copy/paste this into their chat: Fire that streamer! The firebots are taking over!" // The raid message.
+    "raid": {
+        "timer": 30000,
+        "winReward": 100,
+        "loseReward": 50,
+        "raidMessage": "Alright, time for a raid! Copy/paste this into their chat: Fire that streamer! The firebots are taking over!"
     },
     "inactive": {
-        "timer": 2592000000 // How long before a user is purged from the DB for inactivity.
+        "timer": 2592000000
     }
 }

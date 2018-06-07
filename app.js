@@ -263,6 +263,9 @@ function onChatMessage(data){
 
 
 function rpgCommands(username, userid, command, rawcommand, isMod, isStreamer){
+	// Update player username in player db.
+	dbPlayers.push('/'+userid+'/username', username);
+
 	// Commands outside of cooldown.
 	if (command == "!rpg") {
 		sendWhisper(username, "Want to play? Try these commands: " + rpgApp.rpgCommands + ".");
@@ -1136,7 +1139,7 @@ function rpgInventory(username, userid) {
 		var strength = dbPlayers.getData("/" + userid + "/stats/strength");
 		var guile = dbPlayers.getData("/" + userid + "/stats/guile");
 		var magic = dbPlayers.getData("/" + userid + "/stats/magic");
-		var charStats = "(" + strength + "/" + guile + "/" + magic + ")";
+		var charStats = "(S: " + strength + "/G: " + guile + "/M: " + magic + ")";
 	} catch (error) {
 		var charStats = "Error";
 	}
@@ -1362,7 +1365,7 @@ function rpgRaidEvent(username, userid, rawcommand, isMod) {
 					if (diceRoller <= 8){
 						var luckyPerson = rpgApp.raiderList[Math.floor(Math.random() * rpgApp.raiderList.length)];
 						var luckyPersonName = luckyPerson.name;
-						buyTrophy(luckyPersonName, raidTarget, userid);
+						buyTrophy(luckyPersonName, raidTarget, luckyPerson.userid);
 						var raidWinCoin = dbSettings.getData("/raid/winReward");
 						giveallPoints(raidWinCoin);
 						sendBroadcast("The raid has ended. The horde has overcome "+ raidTarget+ " and " + luckyPersonName + " took a trophy. Everyone also gets " + raidWinCoin + " coins!")
@@ -1546,141 +1549,114 @@ function rpgCompanionDuel(username, userid, rawcommand){
 // RPG Player Duel
 // This allows users to battle each other.
 function rpgPlayerDuel(username, userid, rawcommand){
-	var isAllowed = dbSettings.getData("/playerDuel/active");
 
-	if (isAllowed === true){
-		var commandArray = (rawcommand).split(" ");
-		var pointsBet = commandArray[1];
-		var inProgress = dbGame.getData("/playerDuel/settings/inProgress");
-
-		// If points bet is a number and greater than zero, proceed to check to see if they have enough points.
-		if ( isNaN(pointsBet) === false || inProgress === true){
-			var pointsBet = parseInt(pointsBet);
-			let currentPoints = getPoints(userid)
-
-			// Make sure the user has points to bet.
-			if(currentPoints >= pointsBet){
-				// Great, this person exists!
-				var pointsTotal = dbPlayers.getData('/'+userid+'/coins');
-				var minimumBet = dbSettings.getData("/playerDuel/minBet");
-				var inProgress = dbGame.getData("/playerDuel/settings/inProgress");
-				var expire = dbGame.getData("/playerDuel/settings/expireTime");
-				try {
-					var player = dbPlayers.getData("/"+userid+"/stats");
-					var playerName = username;
-					var playerStrength = player.strength;
-					var playerGuile = player.guile;
-					var playerMagic = player.magic;
-				} catch (error) {
-					var player = false;
-				}
-				
-				try {
-					var currentBet = dbGame.getData("/playerDuel/settings/amount");
-				} catch (error){
-					var currentBet = 0;
-				}
-				
-				try {
-					var playerOneName = dbGame.getData("/playerDuel/playerOne/name");
-				} catch (error){
-					var playerOneName = "none";
-				}
-
-				var date = new Date().getTime();
-				var expireCheck = date - expire;
-
-				// Check to see if they have equipment.
-				if ( player !== false ){
-					// Check to see if a duel is in progress and make sure the player doesn't fight themselves and has money to back their bet.
-					if (inProgress === true && pointsTotal >= currentBet && expireCheck <= 30000 && playerOneName !== username){
-						// Push all of their info to the duel arena.
-						dbGame.push("/playerDuel/playerTwo/name", username);
-						dbGame.push("/playerDuel/playerTwo/userid", userid);
-						dbGame.push("/playerDuel/playerTwo/playerName", playerName);
-						dbGame.push("/playerDuel/playerTwo/playerStrength", playerStrength);
-						dbGame.push("/playerDuel/playerTwo/playerGuile", playerGuile);
-						dbGame.push("/playerDuel/playerTwo/playerMagic", playerMagic);
-
-						// Get player data.
-						var playerOne = dbGame.getData("/playerDuel/playerOne");
-						var playerTwo = dbGame.getData("/playerDuel/playerTwo");
-
-						// Take number of points that were bet.
-						deletePoints(playerOne.userid, currentBet);
-						deletePoints(playerTwo.userid, currentBet);
-
-						// Send info to combat function.
-						var playerOneCombat = '{"name": "'+playerOne.name+'", "strength": ' + playerOne.playerStrength + ', "guile": ' + playerOne.playerGuile + ', "magic": ' + playerOne.playerMagic + '}';
-						var playerTwoCombat = '{"name": "'+playerTwo.name+'", "strength": ' + playerTwo.playerStrength + ', "guile": ' + playerTwo.playerGuile + ', "magic": ' + playerTwo.playerMagic + '}';
-
-						// Get Results can calulate winnings.
-						var combatResults = rpgCombat(playerOneCombat, playerTwoCombat, 1);
-						var winnings = currentBet * 2;
-
-						// Give the pot to whoever won.
-						if (playerOne.name == combatResults){
-							console.log('Arena Winner: '+playerOne.name+' || Amount:'+winnings);
-							addPoints(playerOne.userid, winnings);
-							sendBroadcast(playerOne.name + ' has won a bloody duel against '+ playerTwo.name +'! They win '+winnings+' coins.');
-						} else {
-							console.log('Arena Winner: '+playerTwo.name+' || Amount:'+winnings);
-							addPoints(playerTwo.userid, winnings);
-							sendBroadcast(playerTwo.name + ' has won a bloody duel against '+ playerOne.name +'! They win '+winnings+' coins.');
-						}
-						
-						// Reset Game
-						dbGame.delete("/playerDuel/playerOne");
-						dbGame.delete("/playerDuel/playerTwo");
-						dbGame.push("/playerDuel/playerOne/name", "none");
-						dbGame.push("/playerDuel/settings/inProgress", false);
-						dbGame.push("/playerDuel/settings/expireTime", 0);
-						dbGame.push("/playerDuel/settings/amount", 0);
-
-					} else if ( pointsBet <= pointsTotal && pointsBet >= minimumBet && playerOneName !== username && expireCheck >= 30000) {
-						// No duel started, so gather up info and push to duel arena.
-						dbGame.push("/playerDuel/playerOne/name", username);
-						dbGame.push("/playerDuel/playerOne/userid", userid);
-						dbGame.push("/playerDuel/playerOne/playerName", playerName);
-						dbGame.push("/playerDuel/playerOne/playerStrength", playerStrength);
-						dbGame.push("/playerDuel/playerOne/playerGuile", playerGuile);
-						dbGame.push("/playerDuel/playerOne/playerMagic", playerMagic);
-						dbGame.push("/playerDuel/settings/amount", pointsBet);
-						dbGame.push("/playerDuel/settings/expireTime", date);
-						dbGame.push("/playerDuel/settings/inProgress", true);
-						
-						// Broadcast that a duelist is waiting for a challenger.
-						sendBroadcast(playerName+" has bet "+pointsBet+" coins on a duel. Type !rpg-duel to accept the challenge. Expires: 30 sec.");
-					} else if ( playerOneName == username && expireCheck <= 30000){
-						// User is already entered in duel and still waiting on challenger.
-						sendWhisper(username, "Stop hitting yourself! You are already entered in the arena.");
-					} else if (pointsBet >= pointsTotal || pointsTotal <= currentBet || pointsBet < minimumBet) {
-						// Person doesn't have enough points to participate or bet below the minimum.
-						sendWhisper(username, "You do not have enough coins or you bet below the minimum "+minimumBet+" coins.");
-					} else if (expireCheck >= 30000 && pointsBet >= minimumBet ){
-						// Duel time expired. Refund waiting duelist and reset game.
-						var playerOne = dbGame.getData("/playerDuel/playerOne");
-						var betAmount = dbGame.getData("/playerDuel/settings/amount");
-						var playerOneID = playerOne.userid;
-						console.log('Arena Expired. Starting new arena.');
-						dbGame.delete("/playerDuel/playerOne");
-						dbGame.delete("/playerDuel/playerTwo");
-						dbGame.push("/playerDuel/playerOne/name", "none");
-						rpgPlayerDuel(username, userid, rawcommand);
-					} else {
-						console.log('Duel error!');
-					}
-				} else {
-					// Player doesn't have a player to fight with...
-					sendWhisper(username, "You either do not have equipment for this fight, or you don't have enough money!");
-				}
-			};
-		} else {
-			// Someone typed in a command with some gibberish on the end.
-			sendWhisper(username, "Invalid command. Try !rpg-arena (number)");
-		}
-	} else {
+	// Stop if duels are off.
+	let isAllowed = dbSettings.getData("/playerDuel/active");
+	if(!isAllowed){
 		sendWhisper(username, "This command is currently deactivated.");
+		return;
+	}
+
+	let inProgress,
+		expire;
+
+	// See if we have a duel in progress.
+	try{
+		inProgress = dbGame.getData("/playerDuel/settings/inProgress");
+	}catch(err){
+		inProgress = false;
+	}
+
+	// Check to see if the old duel has expired yet.
+	try{
+		expire = dbGame.getData("/playerDuel/settings/expireTime");
+	}catch(err){
+		expire = new Date().getTime();
+	}
+	let expireCheck = new Date().getTime() - expire;
+	if(expireCheck >= 30000){
+		// It expired, clear everything.
+		dbGame.delete("/playerDuel");
+		inProgress = false;
+		dbGame.push('/playerDuel/settings/inProgress', false);
+	}
+
+	let commandArray = (rawcommand).split(" ");
+	let pointsBet = !inProgress ? parseInt(commandArray[1]) : dbGame.getData("/playerDuel/settings/amount");
+	let minimumBet = dbSettings.getData("/playerDuel/minBet");
+
+	// If this happens it means no duel is running and the person tried !rpg BLAHBLAH (without numbers for a bet)
+	if(!inProgress && isNaN(pointsBet)){
+		sendWhisper(username, "Please use numbers when trying to place a bet.");
+		return;
+	}
+
+	// Make sure the bet is over the minimum.
+	if(pointsBet < minimumBet){
+		sendWhisper(username, "The minimum bet is: "+minimumBet);
+		return;
+	}
+
+	// Okay, initial checks passed!
+	// If there is a duel in progress...
+	if(inProgress){
+		// Duel in progress!
+		let currentPoints = getPoints(userid);
+
+		// Stop here if the user doesnt have enough money to cover the bet.
+		if(currentPoints < pointsBet){
+			sendWhisper(username, "You don't have enough money to enter this duel.");
+			return;
+		}
+
+		// BATTLE TIME
+		// Get player data.
+		let playerOne = dbGame.getData("/playerDuel/playerOne");
+		let playerOneProfile = dbPlayers.getData('/'+playerOne);
+		let playerTwoProfile = dbPlayers.getData('/'+userid);
+
+		// Take number of points that were bet.
+		deletePoints(playerOne, pointsBet);
+		deletePoints(userid, pointsBet);
+
+		let playerTwoStrength = playerTwoProfile['stats'].strength || 0,
+			playerTwoGuile = playerTwoProfile['stats'].guile || 0,
+			playerTwoMagic = playerTwoProfile['stats'].magic || 0;
+
+		// Send info to combat function.
+		let playerOneCombat = '{"name": "'+playerOneProfile.username+'", "strength": ' + playerOneProfile['stats'].strength + ', "guile": ' + playerOneProfile['stats'].guile + ', "magic": ' + playerOneProfile['stats'].magic + '}';
+		let playerTwoCombat = '{"name": "'+playerTwoProfile.username+'", "strength": ' + playerTwoStrength + ', "guile": ' + playerTwoGuile + ', "magic": ' + playerTwoMagic + '}';
+
+		// Get Results can calulate winnings.
+		let combatResults = rpgCombat(playerOneCombat, playerTwoCombat, 1);
+		let winnings = pointsBet * 2;
+
+		// Give the pot to whoever won.
+		console.log('Arena Winner: '+combatResults+' || Amount:'+winnings);
+
+		// Give points to whoever won.
+		if(combatResults === username){
+			// Player two (person running command).
+			addPoints(userid, winnings);
+		} else {
+			// Player one
+			addPoints(playerOne, winnings);
+		}
+
+		sendBroadcast(combatResults + ' has won a bloody duel against '+ playerOneProfile.username +'! They win '+winnings+' coins.');
+		
+		// Reset Game
+		dbGame.delete("/playerDuel");
+	} else {
+		// Duel not in progress!
+		let playerProfile = dbPlayers.getData('/'+userid);
+		dbGame.push("/playerDuel/playerOne", userid);
+		dbGame.push("/playerDuel/settings/amount", pointsBet);
+		dbGame.push("/playerDuel/settings/expireTime", new Date().getTime());
+		dbGame.push("/playerDuel/settings/inProgress", true);
+
+		// Broadcast that a duelist is waiting for a challenger.
+		sendBroadcast(playerProfile.username+" has bet "+pointsBet+" coins on a duel. Type !rpg-duel to accept the challenge. Expires: 30 sec.");
 	}
 }
 
@@ -1690,7 +1666,7 @@ function rpgRefreshShop(username, userid, isStreamer){
 	let settings = dbSettings.getData('/shop-refresh');
 	let currentCoins = getPoints(userid);
 
-	if(currentCoins > settings.cost || isStreamer && settings.active === true || isStreamer){
+	if(currentCoins > settings.cost || isStreamer && settings.active === true){
 		request('https://mixer.com/api/v1/chats/'+rpgApp.chanID+'/users', function(error, response, body) {
 			if (!error && response.statusCode == 200) {
 				var data = JSON.parse(body);
@@ -1708,6 +1684,7 @@ function rpgRefreshShop(username, userid, isStreamer){
 				}
 
 				sendBroadcast('A new travelling salesman has come to town! Type !rpg-shop to see his supply.');
+				deletePoints(userid, settings.cost);
 			} else {
 				console.log('Could not access mixer api for store item generation.')
 				sendWhisper(username, "Something went wrong when refreshing the shop.");

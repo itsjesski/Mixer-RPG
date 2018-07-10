@@ -526,12 +526,14 @@ function characterStats(userid) {
 
 	// Loop through equipment and add stats together.
 	let playerEquipment = player.equipment;
-	Object.keys(playerEquipment).forEach(function(key) {
-		let item = playerEquipment[key];
-		totalStrength = item.strength + totalStrength;
-		totalGuile = item.guile + totalGuile;
-		totalMagic = item.magic + totalMagic;
-	});
+	if(playerEquipment != null){
+		Object.keys(playerEquipment).forEach(function(key) {
+			let item = playerEquipment[key];
+			totalStrength = item.strength + totalStrength;
+			totalGuile = item.guile + totalGuile;
+			totalMagic = item.magic + totalMagic;
+		});
+	}
 
 	// Account for prowess and add that in as well.
 	try {
@@ -1351,7 +1353,7 @@ function rpgCompanionDuel(username, userid, rawcommand){
 	}
 
 	let commandArray = (rawcommand).split(" ");
-	let pointsBet = !inProgress ? parseInt(commandArray[1]) : dbGame.getData("companionDuel/settings/amount");
+	let pointsBet = !inProgress ? parseInt(commandArray[1]) : dbGame.getData("/companionDuel/settings/amount");
 	let minimumBet = dbSettings.getData("/companionDuel/minBet");
 
 	// If this happens it means no duel is running and the person tried !rpg BLAHBLAH (without numbers for a bet)
@@ -1385,7 +1387,7 @@ function rpgCompanionDuel(username, userid, rawcommand){
 		let playerTwoProfile = dbPlayers.getData('/'+userid);
 
 		// Only let people will companions enter the battle.
-		if(playerTwoProfile.companion == null){
+		if(playerTwoProfile.equipment.companion == null){
 			sendWhisper(username, "You need a companion to enter an arena battle!");
 			return;
 		}
@@ -1394,13 +1396,13 @@ function rpgCompanionDuel(username, userid, rawcommand){
 		deletePoints(playerOne, pointsBet);
 		deletePoints(userid, pointsBet);
 
-		let playerOneStrength = playerOneProfile['companion'].strength || 0,
-			playerOneGuile = playerOneProfile['companion'].guile || 0,
-			playerOneMagic = playerOneProfile['companion'].magic;
+		let playerOneStrength = playerOneProfile.equipment.companion.strength || 0,
+			playerOneGuile = playerOneProfile.equipment.companion.guile || 0,
+			playerOneMagic = playerOneProfile.equipment.companion.magic;
 
-		let playerTwoStrength = playerTwoProfile['companion'].strength || 0,
-			playerTwoGuile = playerTwoProfile['companion'].guile || 0,
-			playerTwoMagic = playerTwoProfile['companion'].magic || 0;
+		let playerTwoStrength = playerTwoProfile.equipment.companion.strength || 0,
+			playerTwoGuile = playerTwoProfile.equipment.companion.guile || 0,
+			playerTwoMagic = playerTwoProfile.equipment.companion.magic || 0;
 
 		// Send info to combat function.
 		let playerOneCombat = {
@@ -1437,7 +1439,7 @@ function rpgCompanionDuel(username, userid, rawcommand){
 		let playerProfile = dbPlayers.getData('/'+userid);
 
 		// Only let people will companions enter the battle.
-		if(playerProfile.companion == null){
+		if(playerProfile.equipment.companion == null){
 			sendWhisper(username, "You need a companion to start an arena battle!");
 			return;
 		}

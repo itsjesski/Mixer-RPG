@@ -440,9 +440,11 @@ function dbPlayerKeeper(userid, username) {
 		var location = "equipment";
 
 		// Some items might be equipped in different places, like the backpack of temporary items.
+		// Can also set unique settings per item here.
 		switch(itemType){
 			case "potion":
 				location = "backpack";
+				dbPlayers.push("/" + userid + "/" + location + "/" + itemType + "/used", false);
 				break;
 			default:
 				location = "equipment";
@@ -939,6 +941,7 @@ function rpgInventory(username, userid) {
 		var potionName = potion + " : " + potionUsed;
 		var potionStats = "(" + strength + "/" + guile + "/" + magic + ")";
 	} catch (error) {
+		console.log(error);
 		var potionName = "None";
 		var potionStats = "(0/0/0)";
 	}
@@ -992,8 +995,8 @@ function rpgCombat(userOne, userTwo, diceToRoll) {
 	var personOneWin = 0;
 	var personTwoWin = 0
 
-	let personOne = userOne;
-	let personTwo = userTwo;
+	let personOne = userOne || {};
+	let personTwo = userTwo || {};
 
 	let personOneName,
 		personOneStrength,
@@ -1008,9 +1011,9 @@ function rpgCombat(userOne, userTwo, diceToRoll) {
 	if(personOne.userid == null){
 		// No user id provided, get stats from combat packet sent over.
 		personOneName = personOne.name;
-		personOneStrength = personOne.strength;
-		personOneGuile = personOne.guile;
-		personOneMagic = personOne.magic;
+		personOneStrength = personOne.strength || 0;
+		personOneGuile = personOne.guile || 0;
+		personOneMagic = personOne.magic || 0;
 	} else {
 		// User id provided, get stats for character.
 		let userid = personOne.userid;
@@ -1018,15 +1021,15 @@ function rpgCombat(userOne, userTwo, diceToRoll) {
 		switch(personOne.type){
 			case "companion":
 				personOneName = dbPlayers.getData('/'+userid+'/equipment/companion/name');
-				personOneStrength = dbPlayers.getData('/'+userid+'/equipment/companion/strength');
-				personOneGuile = dbPlayers.getData('/'+userid+'/equipment/companion/guile');
-				personOneMagic = dbPlayers.getData('/'+userid+'/equipment/companion/magic');
+				personOneStrength = dbPlayers.getData('/'+userid+'/equipment/companion/strength') || 0;
+				personOneGuile = dbPlayers.getData('/'+userid+'/equipment/companion/guile') || 0;
+				personOneMagic = dbPlayers.getData('/'+userid+'/equipment/companion/magic') || 0;
 				break;
 			default:
 				personOneName = dbPlayers.getData('/'+userid+'/username');
-				personOneStrength = dbPlayers.getData('/'+userid+'/stats/strength');
-				personOneGuile = dbPlayers.getData('/'+userid+'/stats/guile');
-				personOneMagic = dbPlayers.getData('/'+userid+'/stats/magic');
+				personOneStrength = dbPlayers.getData('/'+userid+'/stats/strength') || 0;
+				personOneGuile = dbPlayers.getData('/'+userid+'/stats/guile') || 0;
+				personOneMagic = dbPlayers.getData('/'+userid+'/stats/magic') || 0;
 		}
 
 		// Use potion if they've drank it before this fight, then remove it from inventory.
@@ -1383,7 +1386,6 @@ function rpgCompanionDuel(username, userid, rawcommand){
 		// BATTLE TIME
 		// Get player data.
 		let playerOne = dbGame.getData("/companionDuel/playerOne");
-		let playerOneProfile = dbPlayers.getData('/'+playerOne);
 		let playerTwoProfile = dbPlayers.getData('/'+userid);
 
 		// Only let people will companions enter the battle.
@@ -1395,14 +1397,6 @@ function rpgCompanionDuel(username, userid, rawcommand){
 		// Take number of points that were bet.
 		deletePoints(playerOne, pointsBet);
 		deletePoints(userid, pointsBet);
-
-		let playerOneStrength = playerOneProfile.equipment.companion.strength || 0,
-			playerOneGuile = playerOneProfile.equipment.companion.guile || 0,
-			playerOneMagic = playerOneProfile.equipment.companion.magic;
-
-		let playerTwoStrength = playerTwoProfile.equipment.companion.strength || 0,
-			playerTwoGuile = playerTwoProfile.equipment.companion.guile || 0,
-			playerTwoMagic = playerTwoProfile.equipment.companion.magic || 0;
 
 		// Send info to combat function.
 		let playerOneCombat = {
@@ -1439,8 +1433,14 @@ function rpgCompanionDuel(username, userid, rawcommand){
 		let playerProfile = dbPlayers.getData('/'+userid);
 
 		// Only let people will companions enter the battle.
-		if(playerProfile.equipment.companion == null){
+		if(playerProfile.equipment.companion === null || playerProfile.equipment.companion === undefined){
 			sendWhisper(username, "You need a companion to start an arena battle!");
+			return;
+		}
+
+		// Stop here if person doesnt have enough coins.
+		if(playerProfile.coins < pointsBet){
+			sendWhisper(username, "You do not have enough coins for this battle.");
 			return;
 		}
 
@@ -1556,6 +1556,13 @@ function rpgPlayerDuel(username, userid, rawcommand){
 	} else {
 		// Duel not in progress!
 		let playerProfile = dbPlayers.getData('/'+userid);
+
+		// Stop here if person doesnt have enough coins.
+		if(playerProfile.coins < pointsBet){
+			sendWhisper(username, "You do not have enough coins for this battle.");
+			return;
+		}
+
 		dbGame.push("/playerDuel/playerOne", userid);
 		dbGame.push("/playerDuel/settings/amount", pointsBet);
 		dbGame.push("/playerDuel/settings/expireTime", new Date().getTime());
@@ -1779,6 +1786,11 @@ function rpgPotion(userid){
 		return;
 	}
 
+	if(player.backpack === null || player.backpack === undefined ){
+		sendWhisper(player.username, 'You have nothing in your backpack to drink!');
+		return;
+	}
+
 	// Set used to true if the person drank a potion.
 	if(player.backpack.potion != null){
 		dbPlayers.push('/'+userid+'/backpack/potion/used', true);
@@ -1789,30 +1801,16 @@ function rpgPotion(userid){
 }
 
 
-/* 
+/** 
 function fixer(){
 	var obj = dbPlayers.getData('/');
 	Object.keys(obj).forEach(function(key) {
 		let player = obj[key];
 		console.log('Fixing '+player.username+'.');
-		dbPlayers.push('/'+key+'/equipment/armor', player.armor);
-		dbPlayers.push('/'+key+'/equipment/magic', player.magic);
-		dbPlayers.push('/'+key+'/equipment/ranged', player.ranged);
-		dbPlayers.push('/'+key+'/equipment/mount', player.mount);
-		dbPlayers.push('/'+key+'/equipment/companion', player.companion);
-		dbPlayers.push('/'+key+'/equipment/title', player.title);
-		dbPlayers.push('/'+key+'/equipment/trophy', player.trophy);
-		dbPlayers.push('/'+key+'/equipment/melee', player.melee);
-
-		dbPlayers.delete('/'+key+'/armor');
-		dbPlayers.delete('/'+key+'/magic');
-		dbPlayers.delete('/'+key+'/ranged');
-		dbPlayers.delete('/'+key+'/mount');
-		dbPlayers.delete('/'+key+'/companion');
-		dbPlayers.delete('/'+key+'/title');
-		dbPlayers.delete('/'+key+'/trophy');
-		dbPlayers.delete('/'+key+'/melee');
+		buyPotion(player.username, key);
 	});
 }
-fixer();
+setTimeout(function(){ 
+	fixer();
+}, 10000);
 */

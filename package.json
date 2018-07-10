@@ -13,7 +13,9 @@
     "roll": "^1.1.0",
     "ws": "^5.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+      "eslint": "^4.8.0"
+  },
   "scripts": {
     "start": "node app.js"
   },

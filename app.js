@@ -26,7 +26,7 @@ let socket;
 
 // General Settings
 // Basic app variables used with game.
-rpgApp = {
+let rpgApp = {
     chanID: dbAuth.getData("/channelID"),
     rpgCommands: "!rpg-inventory, !rpg-daily, !rpg-adventure (cost: " + dbSettings.getData('/adventure/cost') + "), !rpg-training (cost: " + dbSettings.getData('/training/cost') + ") !rpg-arena (bet), !rpg-duel (bet), !rpg-shop, !rpg-shop-refresh (cost: " + dbSettings.getData('/shop-refresh/cost') + "), !rpg-sell",
     raidTimer: dbSettings.getData("/raid/timer"),
@@ -62,8 +62,8 @@ if (typeof dbAuth.getData('/clientId') !== 'string') {
     throw new Error('clientId was not a string');
 }
 const authInfo = {
-    client_id: dbAuth.getData('/clientId'),
-    scopes: [
+    "client_id": dbAuth.getData('/clientId'),
+    "scopes": [
         "chat:bypass_slowchat",
         "chat:bypass_links",
         "chat:bypass_filter",
@@ -173,7 +173,7 @@ class MinimalMixerChatClient {
                 console.error('Something went wrong.');
                 console.error(error);
             })
-            .then(response => {
+            .then(() => {
                 mixerClientOpened();
             });
     }
@@ -250,8 +250,9 @@ function onChatMessage(data) {
     if (command == null) {
         return;
     }
-
+    /* Commented out because not used(?!)
     let cmdtype = data.event;
+    */
 
     let username = data['user_name'];
     let userid = data["user_id"];
@@ -278,42 +279,54 @@ function rpgCommands(username, userid, command, rawcommand, isMod, isStreamer) {
     dbPlayers.push('/' + userid + '/username', username);
 
     // Commands outside of cooldown.
-    if (command == "!rpg") {
+    if (command === "!rpg") {
         sendWhisper(username, "Want to play? Try these commands: " + rpgApp.rpgCommands + ".");
-    } else if (command == "!rpg-equip") {
+
+    } else if (command === "!rpg-equip") {
         dbPlayerKeeper(userid, username);
         dbLastSeen(userid);
-    } else if (command == "!rpg-inventory") {
+
+    } else if (command === "!rpg-inventory") {
         rpgInventory(username, userid);
         dbLastSeen(userid);
-    } else if (command == "!rpg-daily") {
+
+    } else if (command === "!rpg-daily") {
         rpgDailyQuest(username, userid);
         dbLastSeen(userid);
-    } else if (command == "!rpg-raid") {
+
+    } else if (command === "!rpg-raid") {
         rpgRaidEvent(username, userid, rawcommand, isMod);
         dbLastSeen(userid);
-    } else if (command == "!rpg-arena") {
+
+    } else if (command === "!rpg-arena") {
         rpgCompanionDuel(username, userid, rawcommand);
         dbLastSeen(userid);
-    } else if (command == "!rpg-duel") {
+
+    } else if (command === "!rpg-duel") {
         rpgPlayerDuel(username, userid, rawcommand);
         dbLastSeen(userid);
-    } else if (command == "!rpg-shop") {
+
+    } else if (command === "!rpg-shop") {
         rpgShopPurchase(username, userid, rawcommand);
         dbLastSeen(userid);
-    } else if (command == "!rpg-shop-refresh") {
+
+    } else if (command === "!rpg-shop-refresh") {
         rpgRefreshShop(username, userid, isStreamer);
         dbLastSeen(userid);
-    } else if (command == "!rpg-training") {
+
+    } else if (command === "!rpg-training") {
         rpgTraining(username, userid);
         dbLastSeen(userid);
-    } else if (command == "!rpg-adventure") {
+
+    } else if (command === "!rpg-adventure") {
         rpgAdventure(username, userid);
         dbLastSeen(userid);
-    } else if (command == "!rpg-sell") {
+
+    } else if (command === "!rpg-sell") {
         rpgSell(userid);
         dbLastSeen(userid);
-    } else if (command == "!rpg-potion") {
+
+    } else if (command === "!rpg-potion") {
         rpgPotion(userid);
         dbLastSeen(userid);
     }
@@ -357,8 +370,7 @@ function getPoints(userid) {
 
 // Delete Coins
 function deletePoints(userid, coins) {
-    let currentCoins,
-        newCoins;
+    let currentCoins;
     try {
         currentCoins = dbPlayers.getData('/' + userid + '/coins');
         dbPlayers.push('/' + userid + '/coins', currentCoins - coins);
@@ -373,8 +385,6 @@ function giveallPoints(coins) {
 
     for (let i in users) {
         if (!users.hasOwnProperty(i)) continue;
-        let user = users[i];
-
         addPoints(i, coins);
     }
 
@@ -418,10 +428,10 @@ function dbCleanup() {
         for (let i in players) {
             if (!players.hasOwnProperty(i)) continue;
             let person = players[i];
-		    if (person.lastSeen != null && date - person.lastSeen.lastActive >= inactiveTimer) {
-		    	dbPlayers.delete("/" + i);
-		    	console.log('Cleanup removed ' + person.name + ' due to inactivity.');
-		    }
+            if (person.lastSeen != null && date - person.lastSeen.lastActive >= inactiveTimer) {
+                dbPlayers.delete("/" + i);
+                console.log('Cleanup removed ' + person.name + ' due to inactivity.');
+            }
         }
 
         console.log('Cleanup finished.');
@@ -472,6 +482,7 @@ function dbPlayerKeeper(userid, username) {
 // General / Helper
 ///////////////////
 
+/* Commented out as not used(?!?!)
 // Array Shuffler
 // Shuffles an array.
 function shuffle(array) {
@@ -489,21 +500,18 @@ function shuffle(array) {
         array[currentIndex] = array[randomIndex];
         array[randomIndex] = temporaryValue;
     }
-
     return array;
 }
+*/
 
 // Millisecond to Human Converter
 // Convers millisconds into a timestamp people can read.
 function msToTime(duration) {
-    let milliseconds = parseInt((duration % 1000) / 100),
-        seconds = parseInt((duration / 1000) % 60),
-        minutes = parseInt((duration / (1000 * 60)) % 60),
-        hours = parseInt((duration / (1000 * 60 * 60)) % 24);
+    let hours = Math.floor(duration / 3600000),
+        minutes = Math.floor((duration - (hours * 3600000)) / 60000);
 
     hours = (hours < 10) ? "0" + hours : hours;
     minutes = (minutes < 10) ? "0" + minutes : minutes;
-    seconds = (seconds < 10) ? "0" + seconds : seconds;
 
     return hours + " hours and " + minutes + " minutes.";
 }
@@ -523,41 +531,43 @@ function search(nameKey, myArray) {
 // This takes into account all character items and builds out the total character stats.
 function characterStats(userid) {
     const player = dbPlayers.getData('/' + userid);
-    var totalStrength = 0;
-    var totalGuile = 0;
-    var totalMagic = 0;
-
+    let totalStrength = 0,
+        totalGuile = 0,
+        totalMagic = 0,
+        strength,
+        guile,
+        magic;
 
     // Loop through equipment and add stats together.
     let playerEquipment = player.equipment;
     if (playerEquipment != null) {
         Object.keys(playerEquipment).forEach(function(key) {
             let item = playerEquipment[key];
-            totalStrength = item.strength + totalStrength;
-            totalGuile = item.guile + totalGuile;
-            totalMagic = item.magic + totalMagic;
+            totalStrength += item.strength;
+            totalGuile += item.guile;
+            totalMagic += item.magic;
         });
     }
 
     // Account for prowess and add that in as well.
     try {
-        var strength = player.prowess.strength;
+        strength = player.prowess.strength;
     } catch (error) {
-        var strength = 0;
+        strength = 0;
     }
     try {
-        var guile = player.prowess.guile;
+        guile = player.prowess.guile;
     } catch (error) {
-        var guile = 0;
+        guile = 0;
     }
     try {
-        var magic = player.prowess.magic;
+        magic = player.prowess.magic;
     } catch (error) {
-        var magic = 0;
+        magic = 0;
     }
-    var totalStrength = totalStrength + strength;
-    var totalGuile = totalGuile + guile;
-    var totalMagic = totalMagic + magic;
+    totalStrength = totalStrength + strength;
+    totalGuile = totalGuile + guile;
+    totalMagic = totalMagic + magic;
 
     // Push our updated stats back to profile.
     dbPlayers.push("/" + userid + "/stats/strength", totalStrength);
@@ -576,33 +586,32 @@ function buyMonster(username, userid) {
 
     let typeOneRandom = typeOne[Math.floor(Math.random() * typeOne.length)];
     let typeTwoRandom = typeTwo[Math.floor(Math.random() * typeTwo.length)];
-    var monster = typeOneRandom + " " + typeTwoRandom;
+    let monsterName = typeOneRandom + " " + typeTwoRandom;
 
-    let monsterName = monster;
-    var diceRoller = (dice.roll({
+    let monsterStrength = (dice.roll({
         quantity: 9,
         sides: 6,
         transformations: ['sum']
     })).result;
-    let monsterStrength = diceRoller;
-    var diceRoller = (dice.roll({
+
+    let monsterGuile = (dice.roll({
         quantity: 9,
         sides: 6,
         transformations: ['sum']
     })).result;
-    let monsterGuile = diceRoller;
-    var diceRoller = (dice.roll({
+
+    let monsterMagic = (dice.roll({
         quantity: 9,
         sides: 6,
         transformations: ['sum']
     })).result;
-    let monsterMagic = diceRoller;
+
 
     // Send to combat.
     let player = {
         userid: userid
     };
-    var monster = {
+    let monster = {
         "name": monsterName,
         "strength": monsterStrength,
         "guile": monsterGuile,
@@ -610,7 +619,7 @@ function buyMonster(username, userid) {
     };
 
     let combatResults = rpgCombat(player, monster, 1);
-    if (combatResults == username) {
+    if (combatResults === username) {
         // Add points to user
         let settings = dbSettings.getData('/adventure');
         addPoints(userid, settings["monsterReward"]);
@@ -845,139 +854,164 @@ function rpgInventory(username, userid) {
     // Recalc total.
     characterStats(userid);
 
+    let title,
+        titleStats,
+        melee,
+        meleeStats,
+        ranged,
+        rangedStats,
+        magicName,
+        magicStats,
+        armor,
+        armorStats,
+        mount,
+        mountStats,
+        companion,
+        companionStats,
+        trophy,
+        trophyStats,
+        potionName,
+        potionStats,
+        prowessStrength,
+        prowessGuile,
+        prowessMagic,
+        charStats,
+        coins;
+
     try {
-        var title = dbPlayers.getData("/" + userid + "/equipment/title/name");
-        var strength = dbPlayers.getData("/" + userid + "/equipment/title/strength");
-        var guile = dbPlayers.getData("/" + userid + "/equipment/title/guile");
-        var magic = dbPlayers.getData("/" + userid + "/equipment/title/magic");
-        var titleStats = "(" + strength + "/" + guile + "/" + magic + ")";
+        let strength = dbPlayers.getData("/" + userid + "/equipment/title/strength");
+        let guile = dbPlayers.getData("/" + userid + "/equipment/title/guile");
+        let magic = dbPlayers.getData("/" + userid + "/equipment/title/magic");
+
+        title = dbPlayers.getData("/" + userid + "/equipment/title/name");
+        titleStats = "(" + strength + "/" + guile + "/" + magic + ")";
     } catch (error) {
-        var title = "Commoner";
-        var titleStats = "(0/0/0)";
+        title = "Commoner";
+        titleStats = "(0/0/0)";
+    }
+    try {
+        let strength = dbPlayers.getData("/" + userid + "/equipment/melee/strength");
+        let guile = dbPlayers.getData("/" + userid + "/equipment/melee/guile");
+        let magic = dbPlayers.getData("/" + userid + "/equipment/melee/magic");
+
+        melee = dbPlayers.getData("/" + userid + "/equipment/melee/name");
+        meleeStats = "(" + strength + "/" + guile + "/" + magic + ")";
+    } catch (error) {
+        melee = "Fists";
+        meleeStats = "(0/0/0)";
+    }
+    try {
+        let strength = dbPlayers.getData("/" + userid + "/equipment/ranged/strength");
+        let guile = dbPlayers.getData("/" + userid + "/equipment/ranged/guile");
+        let magic = dbPlayers.getData("/" + userid + "/equipment/ranged/magic");
+
+        ranged = dbPlayers.getData("/" + userid + "/equipment/ranged/name");
+        rangedStats = "(" + strength + "/" + guile + "/" + magic + ")";
+    } catch (error) {
+        ranged = "Nothing";
+        rangedStats = "(0/0/0)";
+    }
+    try {
+        let strength = dbPlayers.getData("/" + userid + "/equipment/magic/strength");
+        let guile = dbPlayers.getData("/" + userid + "/equipment/magic/guile");
+        let magic = dbPlayers.getData("/" + userid + "/equipment/magic/magic");
+
+        magicName = dbPlayers.getData("/" + userid + "/equipment/magic/name");
+        magicStats = "(" + strength + "/" + guile + "/" + magic + ")";
+    } catch (error) {
+        magicName = "Nothing";
+        magicStats = "(0/0/0)";
+    }
+    try {
+        let strength = dbPlayers.getData("/" + userid + "/equipment/armor/strength");
+        let guile = dbPlayers.getData("/" + userid + "/equipment/armor/guile");
+        let magic = dbPlayers.getData("/" + userid + "/equipment/armor/magic");
+
+        armor = dbPlayers.getData("/" + userid + "/equipment/armor/name");
+        armorStats = "(" + strength + "/" + guile + "/" + magic + ")";
+    } catch (ignore) {
+        armor = "Naked";
+        armorStats = "(0/0/0)";
+    }
+    try {
+        let strength = dbPlayers.getData("/" + userid + "/equipment/mount/strength");
+        let guile = dbPlayers.getData("/" + userid + "/equipment/mount/guile");
+        let magic = dbPlayers.getData("/" + userid + "/equipment/mount/magic");
+
+        mount = dbPlayers.getData("/" + userid + "/equipment/mount/name");
+        mountStats = "(" + strength + "/" + guile + "/" + magic + ")";
+    } catch (error) {
+        mount = "Nothing";
+        mountStats = "(0/0/0)";
+    }
+    try {
+        let strength = dbPlayers.getData("/" + userid + "/equipment/companion/strength");
+        let guile = dbPlayers.getData("/" + userid + "/equipment/companion/guile");
+        let magic = dbPlayers.getData("/" + userid + "/equipment/companion/magic");
+
+        companion = dbPlayers.getData("/" + userid + "/equipment/companion/name");
+        companionStats = "(" + strength + "/" + guile + "/" + magic + ")";
+    } catch (error) {
+        companion = "None";
+        companionStats = "(0/0/0)";
+    }
+    try {
+        let strength = dbPlayers.getData("/" + userid + "/equipment/trophy/strength");
+        let guile = dbPlayers.getData("/" + userid + "/equipment/trophy/guile");
+        let magic = dbPlayers.getData("/" + userid + "/equipment/trophy/magic");
+
+        trophy = dbPlayers.getData("/" + userid + "/equipment/trophy/name");
+        trophyStats = "(" + strength + "/" + guile + "/" + magic + ")";
+    } catch (error) {
+        trophy = "None";
+        trophyStats = "(0/0/0)";
     }
 
-    try {
-        var melee = dbPlayers.getData("/" + userid + "/equipment/melee/name");
-        var strength = dbPlayers.getData("/" + userid + "/equipment/melee/strength");
-        var guile = dbPlayers.getData("/" + userid + "/equipment/melee/guile");
-        var magic = dbPlayers.getData("/" + userid + "/equipment/melee/magic");
-        var meleeStats = "(" + strength + "/" + guile + "/" + magic + ")";
-    } catch (error) {
-        var melee = "Fists";
-        var meleeStats = "(0/0/0)";
-    }
 
     try {
-        var ranged = dbPlayers.getData("/" + userid + "/equipment/ranged/name");
-        var strength = dbPlayers.getData("/" + userid + "/equipment/ranged/strength");
-        var guile = dbPlayers.getData("/" + userid + "/equipment/ranged/guile");
-        var magic = dbPlayers.getData("/" + userid + "/equipment/ranged/magic");
-        var rangedStats = "(" + strength + "/" + guile + "/" + magic + ")";
-    } catch (error) {
-        var ranged = "Nothing";
-        var rangedStats = "(0/0/0)";
-    }
-
-    try {
-        var magicName = dbPlayers.getData("/" + userid + "/equipment/magic/name");
-        var strength = dbPlayers.getData("/" + userid + "/equipment/magic/strength");
-        var guile = dbPlayers.getData("/" + userid + "/equipment/magic/guile");
-        var magic = dbPlayers.getData("/" + userid + "/equipment/magic/magic");
-        var magicStats = "(" + strength + "/" + guile + "/" + magic + ")";
-    } catch (error) {
-        var magicName = "Nothing";
-        var magicStats = "(0/0/0)";
-    }
-
-    try {
-        var armor = dbPlayers.getData("/" + userid + "/equipment/armor/name");
-        var strength = dbPlayers.getData("/" + userid + "/equipment/armor/strength");
-        var guile = dbPlayers.getData("/" + userid + "/equipment/armor/guile");
-        var magic = dbPlayers.getData("/" + userid + "/equipment/armor/magic");
-        var armorStats = "(" + strength + "/" + guile + "/" + magic + ")";
-    } catch (error) {
-        var armor = "Naked";
-        var armorStats = "(0/0/0)";
-    }
-
-    try {
-        var mount = dbPlayers.getData("/" + userid + "/equipment/mount/name");
-        var strength = dbPlayers.getData("/" + userid + "/equipment/mount/strength");
-        var guile = dbPlayers.getData("/" + userid + "/equipment/mount/guile");
-        var magic = dbPlayers.getData("/" + userid + "/equipment/mount/magic");
-        var mountStats = "(" + strength + "/" + guile + "/" + magic + ")";
-    } catch (error) {
-        var mount = "Nothing";
-        var mountStats = "(0/0/0)";
-    }
-
-    try {
-        var companion = dbPlayers.getData("/" + userid + "/equipment/companion/name");
-        var strength = dbPlayers.getData("/" + userid + "/equipment/companion/strength");
-        var guile = dbPlayers.getData("/" + userid + "/equipment/companion/guile");
-        var magic = dbPlayers.getData("/" + userid + "/equipment/companion/magic");
-        var companionStats = "(" + strength + "/" + guile + "/" + magic + ")";
-    } catch (error) {
-        var companion = "None";
-        var companionStats = "(0/0/0)";
-    }
-
-    try {
-        var trophy = dbPlayers.getData("/" + userid + "/equipment/trophy/name");
-        var strength = dbPlayers.getData("/" + userid + "/equipment/trophy/strength");
-        var guile = dbPlayers.getData("/" + userid + "/equipment/trophy/guile");
-        var magic = dbPlayers.getData("/" + userid + "/equipment/trophy/magic");
-        var trophyStats = "(" + strength + "/" + guile + "/" + magic + ")";
-    } catch (error) {
-        var trophy = "None";
-        var trophyStats = "(0/0/0)";
-    }
-
-
-    try {
+        let strength = dbPlayers.getData("/" + userid + "/backpack/potion/strength");
+        let guile = dbPlayers.getData("/" + userid + "/backpack/potion/guile");
+        let magic = dbPlayers.getData("/" + userid + "/backpack/potion/magic");
         let potion = dbPlayers.getData("/" + userid + "/backpack/potion/name");
-        var strength = dbPlayers.getData("/" + userid + "/backpack/potion/strength");
-        var guile = dbPlayers.getData("/" + userid + "/backpack/potion/guile");
-        var magic = dbPlayers.getData("/" + userid + "/backpack/potion/magic");
         let potionUsed = dbPlayers.getData("/" + userid + "/backpack/potion/used") ? "Active" : "Inactive";
-        var potionName = potion + " : " + potionUsed;
-        var potionStats = "(" + strength + "/" + guile + "/" + magic + ")";
+
+        potionName = potion + " : " + potionUsed;
+        potionStats = "(" + strength + "/" + guile + "/" + magic + ")";
     } catch (error) {
-        console.log(error);
-        var potionName = "None";
-        var potionStats = "(0/0/0)";
+        potionName = "None";
+        potionStats = "(0/0/0)";
     }
 
     try {
-        var prowessStrength = dbPlayers.getData("/" + userid + "/prowess/strength");
+        prowessStrength = dbPlayers.getData("/" + userid + "/prowess/strength");
     } catch (error) {
-        var prowessStrength = 0;
+        prowessStrength = 0;
     }
     try {
-        var prowessGuile = dbPlayers.getData("/" + userid + "/prowess/guile");
+        prowessGuile = dbPlayers.getData("/" + userid + "/prowess/guile");
     } catch (error) {
-        var prowessGuile = 0;
+        prowessGuile = 0;
     }
     try {
-        var prowessMagic = dbPlayers.getData("/" + userid + "/prowess/magic");
+        prowessMagic = dbPlayers.getData("/" + userid + "/prowess/magic");
     } catch (error) {
-        var prowessMagic = 0;
+        prowessMagic = 0;
     }
     let prowessStats = "(" + prowessStrength + "/" + prowessGuile + "/" + prowessMagic + ")";
 
     try {
-        var strength = dbPlayers.getData("/" + userid + "/stats/strength");
-        var guile = dbPlayers.getData("/" + userid + "/stats/guile");
-        var magic = dbPlayers.getData("/" + userid + "/stats/magic");
-        var charStats = "(S: " + strength + "/G: " + guile + "/M: " + magic + ")";
+        let strength = dbPlayers.getData("/" + userid + "/stats/strength");
+        let guile = dbPlayers.getData("/" + userid + "/stats/guile");
+        let magic = dbPlayers.getData("/" + userid + "/stats/magic");
+        charStats = "(S: " + strength + "/G: " + guile + "/M: " + magic + ")";
     } catch (error) {
-        var charStats = "Error";
+        charStats = "Error";
     }
 
     try {
-        var coins = dbPlayers.getData("/" + userid + "/coins");
+        coins = dbPlayers.getData("/" + userid + "/coins");
     } catch (err) {
-        var coins = "0";
+        coins = "0";
     }
 
     let sayInventory1 = username + " the " + title + " " + titleStats + " || Coins: " + coins + " || Melee: " + melee + " " + meleeStats + " || Ranged: " + ranged + " " + rangedStats + " || Magic: " + magicName + " " + magicStats + " || Armor: " + armor + " " + armorStats;
@@ -993,9 +1027,9 @@ function rpgInventory(username, userid) {
 // RPG Combat
 // This handles combat in the game.
 function rpgCombat(userOne, userTwo, diceToRoll) {
-    var round = 0;
-    var personOneWin = 0;
-    var personTwoWin = 0;
+    let round = 0;
+    let personOneWin = 0;
+    let personTwoWin = 0;
 
     let personOne = userOne || {};
     let personTwo = userTwo || {};
@@ -1004,10 +1038,14 @@ function rpgCombat(userOne, userTwo, diceToRoll) {
         personOneStrength,
         personOneGuile,
         personOneMagic,
+        personOneRoll,
         personTwoName,
         personTwoStrength,
         personTwoGuile,
-        personTwoMagic;
+        personTwoMagic,
+        personTwoRoll;
+
+    let result;
 
     // Get person one stats.
     if (personOne.userid == null) {
@@ -1016,6 +1054,7 @@ function rpgCombat(userOne, userTwo, diceToRoll) {
         personOneStrength = personOne.strength || 0;
         personOneGuile = personOne.guile || 0;
         personOneMagic = personOne.magic || 0;
+
     } else {
         // User id provided, get stats for character.
         let userid = personOne.userid;
@@ -1027,6 +1066,7 @@ function rpgCombat(userOne, userTwo, diceToRoll) {
             personOneGuile = dbPlayers.getData('/' + userid + '/equipment/companion/guile') || 0;
             personOneMagic = dbPlayers.getData('/' + userid + '/equipment/companion/magic') || 0;
             break;
+
         default:
             personOneName = dbPlayers.getData('/' + userid + '/username');
             personOneStrength = dbPlayers.getData('/' + userid + '/stats/strength') || 0;
@@ -1043,7 +1083,7 @@ function rpgCombat(userOne, userTwo, diceToRoll) {
                 personOneMagic = personOneMagic + personOnePotion.magic;
                 dbPlayers.delete('/' + userid + '/backpack/potion');
             }
-        } catch (err) {}
+        } catch (ignore) {} //eslint-disable-line no-empty
     }
 
     // Get person one stats.
@@ -1080,80 +1120,90 @@ function rpgCombat(userOne, userTwo, diceToRoll) {
                 personOneMagic = personOneMagic + personOnePotion.magic;
                 dbPlayers.delete('/' + userid + '/backpack/potion');
             }
-        } catch (err) {}
+        } catch (ignore) { } //eslint-disable-line no-empty
     }
 
     while (round < 3) {
+
         // Pick stat to face off with.
         let statPicker = (dice.roll('d3')).result;
         if (statPicker === 1) {
-            //Strength
-            var diceRoller = (dice.roll({
-                quantity: diceToRoll,
-                sides: 6,
-                transformations: ['sum']
-            })).result;
-            var personOneRoll = personOneStrength + diceRoller;
 
-            var diceRoller = (dice.roll({
+            //Strength
+            personOneRoll = (dice.roll({
                 quantity: diceToRoll,
                 sides: 6,
                 transformations: ['sum']
             })).result;
-            var personTwoRoll = personTwoStrength + diceRoller;
+            personOneRoll += personOneStrength;
+
+            personTwoRoll = (dice.roll({
+                quantity: diceToRoll,
+                sides: 6,
+                transformations: ['sum']
+            })).result;
+            personTwoRoll += personTwoStrength;
+
             console.log('Strength: ' + personOneRoll + ' vs ' + personTwoRoll);
 
             if (personOneRoll >= personTwoRoll) {
-                var personOneWin = personOneWin + 1;
+                personOneWin = personOneWin + 1;
             } else {
-                var personTwoWin = personTwoWin + 1;
+                personTwoWin = personTwoWin + 1;
             }
         } else if (statPicker === 2) {
+
             //Guile
-            var diceRoller = (dice.roll({
+            personOneRoll = (dice.roll({
                 quantity: diceToRoll,
                 sides: 6,
                 transformations: ['sum']
             })).result;
-            var personOneRoll = personOneGuile + diceRoller;
-            var diceRoller = (dice.roll({
+            personOneRoll += personOneGuile;
+
+
+            personTwoRoll = (dice.roll({
                 quantity: diceToRoll,
                 sides: 6,
                 transformations: ['sum']
             })).result;
-            var personTwoRoll = personTwoGuile + diceRoller;
+            personTwoRoll += personTwoGuile;
+
             console.log('Guile: ' + personOneRoll + ' vs ' + personTwoRoll);
 
             if (personOneRoll >= personTwoRoll) {
-                var personOneWin = personOneWin + 1;
+                personOneWin = personOneWin + 1;
             } else {
-                var personTwoWin = personTwoWin + 1;
+                personTwoWin = personTwoWin + 1;
             }
         } else {
+
             //Magic
-            var diceRoller = (dice.roll({
+            personOneRoll = (dice.roll({
                 quantity: diceToRoll,
                 sides: 6,
                 transformations: ['sum']
             })).result;
-            var personOneRoll = personOneMagic + diceRoller;
-            var diceRoller = (dice.roll({
+            personOneRoll += personOneMagic;
+
+            personTwoRoll = (dice.roll({
                 quantity: diceToRoll,
                 sides: 6,
                 transformations: ['sum']
             })).result;
-            var personTwoRoll = personTwoMagic + diceRoller;
+            personTwoRoll += personTwoMagic;
+
             console.log('Magic: ' + personOneRoll + ' vs ' + personTwoRoll);
 
             if (personOneRoll >= personTwoRoll) {
-                var personOneWin = personOneWin + 1;
+                personOneWin = personOneWin + 1;
             } else {
-                var personTwoWin = personTwoWin + 1;
+                personTwoWin = personTwoWin + 1;
             }
         }
 
         // Go to next round.
-        var round = round + 1;
+        round = round + 1;
     }
 
     console.log('Combat Results: ' + personOneName + ': ' + personOneWin + ' vs ' + personTwoName + ': ' + personTwoWin);
@@ -1170,9 +1220,9 @@ function rpgCombat(userOne, userTwo, diceToRoll) {
 
     // Return battle results to main functions for payouts, etc...
     if (personOneWin > personTwoWin) {
-        var result = personOneName;
+        result = personOneName;
     } else {
-        var result = personTwoName;
+        result = personTwoName;
     }
 
     return result;
@@ -1230,10 +1280,11 @@ function rpgAdventure(username, userid) {
 // This is a simply daily that people can trigger once every 24 hours to get a coin boost.
 function rpgDailyQuest(username, userid) {
     let dailyReward = dbSettings.getData("/dailyReward");
+    let lastDaily;
     try {
-        var lastDaily = dbPlayers.getData("/" + userid + "/lastSeen/dailyQuest");
+        lastDaily = dbPlayers.getData("/" + userid + "/lastSeen/dailyQuest");
     } catch (error) {
-        var lastDaily = 1;
+        lastDaily = 1;
     }
     let date = new Date().getTime();
     let timeSinceLastDaily = date - lastDaily;
@@ -1258,11 +1309,10 @@ function rpgRaidEvent(username, userid, rawcommand, isMod) {
     if (isMod === true && rpgApp.raidActive === false && raidTarget !== undefined) {
 
         // Get target info and start up the raid.
-        request('https://mixer.com/api/v1/channels/' + raidTarget, function(error, response, body) {
-            if (!error && response.statusCode == 200) {
+        request('https://mixer.com/api/v1/channels/' + raidTarget, function(error, response) {
+            if (!error && response.statusCode === 200) {
+
                 // Great, valid raid target. Get target info, set raid to active, send broadcast to overlay with info.
-                let data = JSON.parse(body);
-                let streamUrl = "https://mixer.com/" + raidTarget;
                 sendBroadcast(username + " has started a raid! Type !rpg-raid to join!");
                 rpgApp.raidActive = true;
 
@@ -1312,9 +1362,9 @@ function rpgRaidEvent(username, userid, rawcommand, isMod) {
                 "name": username,
                 "userid": userid
             });
-            sendWhisper(username, "You\'ve joined the raid!");
+            sendWhisper(username, "You've joined the raid!");
         } else {
-            sendWhisper(username, "You\'ve already joined the raid!");
+            sendWhisper(username, "You've already joined the raid!");
         }
     } else {
         // No raid is active
@@ -1580,15 +1630,14 @@ function rpgPlayerDuel(username, userid, rawcommand) {
 function rpgRefreshShop(username, userid, isStreamer) {
     let settings = dbSettings.getData('/shop-refresh');
     let currentCoins = getPoints(userid);
-
     if (currentCoins >= settings.cost || isStreamer && settings.active === true) {
-        request('https://mixer.com/api/v1/chats/' + rpgApp.chanID + '/users', function(error, response, body) {
-            if (!error && response.statusCode == 200) {
+        request(`https://mixer.com/api/v1/chats/${rpgApp.chanID}/users`, function(error, response, body) {
+            if (!error && response.statusCode === 200) {
                 let data = JSON.parse(body);
                 let user = data[Math.floor(Math.random() * data.length)];
                 let trophyName = user.userName;
 
-                for (i = 1; i < 4; i++) {
+                for (let i = 1; i < 4; i++) {
                     let item = rpgShopGeneration(trophyName);
                     dbGame.push("/shop/item" + i + "/itemName", item.name);
                     dbGame.push("/shop/item" + i + "/strength", item.strength);
@@ -1654,15 +1703,14 @@ function rpgShopGeneration(trophyName) {
 function rpgShopPurchase(username, userid, rawcommand) {
     let commandArray = (rawcommand).split(" ");
     let command = Math.floor(commandArray[1]);
+    let item;
 
     if (isNaN(command) === false && command <= 3 && command > 0) {
         // Player is trying to purchase.
 
         try {
-            var item = dbGame.getData("/shop/item" + command);
-        } catch (error) {
-
-        }
+            item = dbGame.getData("/shop/item" + command);
+        } catch (ignore) { } //eslint-disable-line no-empty
 
         if (item.price !== "sold") {
             // Great, this person exists!
@@ -1698,7 +1746,10 @@ function rpgShopPurchase(username, userid, rawcommand) {
 // This allows the user to spend coins to permanent gain a stat point.
 function rpgTraining(username, userid) {
     let currentCoin,
-        trainingSettings;
+        trainingSettings,
+        strength,
+        guile,
+        magic;
 
     try {
         currentCoin = dbPlayers.getData('/' + userid + '/coins');
@@ -1710,26 +1761,26 @@ function rpgTraining(username, userid) {
 
     if (currentCoin >= trainingSettings.cost && trainingSettings.active === true) {
         let mission = rpgApp.training[Math.floor(Math.random() * rpgApp.training.length)];
-        var missionText = mission.text;
+        let missionText = mission.text;
         let missionStrength = mission.strength;
         let missionGuile = mission.guile;
         let missionMagic = mission.magic;
         let missionCoin = mission.coins;
 
         try {
-            var strength = dbPlayers.getData("/" + userid + "/prowess/strength");
+            strength = dbPlayers.getData("/" + userid + "/prowess/strength");
         } catch (error) {
-            var strength = 0;
+            strength = 0;
         }
         try {
-            var guile = dbPlayers.getData("/" + userid + "/prowess/guile");
+            guile = dbPlayers.getData("/" + userid + "/prowess/guile");
         } catch (error) {
-            var guile = 0;
+            guile = 0;
         }
         try {
-            var magic = dbPlayers.getData("/" + userid + "/prowess/magic");
+            magic = dbPlayers.getData("/" + userid + "/prowess/magic");
         } catch (error) {
-            var magic = 0;
+            magic = 0;
         }
 
         // If mission gives stats...
@@ -1749,7 +1800,7 @@ function rpgTraining(username, userid) {
         }
 
         // Send a whisper about what happened.
-        var missionText = missionText + " || Prowess:(" + missionStrength + "/" + missionGuile + "/" + missionMagic + ") || " + missionCoin + " coins.";
+        missionText = `${missionText} || Prowess:(${missionStrength}/${missionGuile}/${missionMagic}) || ${missionCoin} coins.`;
         sendWhisper(username, missionText);
         deletePoints(userid, trainingSettings.cost);
     } else {

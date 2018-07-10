@@ -941,7 +941,6 @@ function rpgInventory(username, userid) {
 		var potionName = potion + " : " + potionUsed;
 		var potionStats = "(" + strength + "/" + guile + "/" + magic + ")";
 	} catch (error) {
-		console.log(error);
 		var potionName = "None";
 		var potionStats = "(0/0/0)";
 	}
@@ -1158,12 +1157,12 @@ function rpgCombat(userOne, userTwo, diceToRoll) {
 
 	// Send whisper to player one if they're a person.
 	if(personOne.userid != null){
-		sendWhisper(personOneName, "Combat Results: " + personOneName + " (" + personOneStrength + "/" + personOneGuile + "/" + personOneMagic + ") won "+personOneWin+" times. vs " + personTwo.name + " (" + personTwoStrength + "/" + personTwoGuile + "/" + personTwoMagic + ") won "+personTwoWin+" times.");
+		sendWhisper(personOneName, "Combat Results: " + personOneName + " (" + personOneStrength + "/" + personOneGuile + "/" + personOneMagic + ") won "+personOneWin+" times. vs " + personTwoName + " (" + personTwoStrength + "/" + personTwoGuile + "/" + personTwoMagic + ") won "+personTwoWin+" times.");
 	}
 	
 	// Send whisper to player two if they're a person.
 	if(personTwo.userid != null){
-		sendWhisper(personTwoName, "Combat Results: " + personOneName+ " (" + personOneStrength + "/" + personOneGuile + "/" + personOneMagic + ") won "+personOneWin+" times. vs " + personTwo.name + " (" + personTwoStrength + "/" + personTwoGuile + "/" + personTwoMagic + ") won "+personTwoWin+" times.");
+		sendWhisper(personTwoName, "Combat Results: " + personOneName+ " (" + personOneStrength + "/" + personOneGuile + "/" + personOneMagic + ") won "+personOneWin+" times. vs " + personTwoName + " (" + personTwoStrength + "/" + personTwoGuile + "/" + personTwoMagic + ") won "+personTwoWin+" times.");
 	}
 
 	// Return battle results to main functions for payouts, etc...

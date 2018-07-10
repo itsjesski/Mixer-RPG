@@ -4,7 +4,8 @@
     "dailyReward": 500,
     "adventure":{
         "cost": 500,
-        "active": true
+        "active": true,
+        "monsterReward": 750
     },
     "playerDuel": {
         "active": true,
@@ -16,9 +17,20 @@
     },
     "raid": {
         "timer": 30000,
-        "winReward": 100,
-        "loseReward": 50,
+        "winReward": 1000,
+        "loseReward": 250,
         "raidMessage": "Alright, time for a raid! Copy/paste this into their chat: Fire that streamer! The firebots are taking over!"
+    },
+    "training":{
+        "active": true,
+        "cost": 500
+    },
+    "shop-refresh":{
+        "cost": "250",
+        "active": true
+    },
+    "sell":{
+        "amount": 250
     },
     "inactive": {
         "timer": 2592000000

@@ -1698,5 +1698,95 @@
 			"magic": 5
 		}
 	],
+	"potionTypeOne": [
+		{
+			"name": "Big",
+			"strength":3,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Small",
+			"strength":1,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Weird",
+			"strength":1,
+			"guile": 2,
+			"magic": 2
+		},
+		{
+			"name": "Tiny",
+			"strength":1,
+			"guile": 2,
+			"magic": 2
+		},
+		{
+			"name": "Old",
+			"strength":1,
+			"guile": 2,
+			"magic": 1
+		}
+	],
+	"potionTypeTwo": [
+		{
+			"name": "Slimey",
+			"strength":1,
+			"guile": 3,
+			"magic": 1
+		},
+		{
+			"name": "Bubbling",
+			"strength":1,
+			"guile": 1,
+			"magic": 3
+		},
+		{
+			"name": "Magic",
+			"strength":1,
+			"guile": 1,
+			"magic": 3
+		},
+		{
+			"name": "Smelly",
+			"strength":1,
+			"guile": 1,
+			"magic": 1
+		},
+		{
+			"name": "Glowing",
+			"strength":3,
+			"guile": 3,
+			"magic": 3
+		}
+	],
+	"potionTypeThree": [
+		{
+			"name": "Vial",
+			"strength":5,
+			"guile": 3,
+			"magic": 2
+		},
+		{
+			"name": "Jar",
+			"strength":4,
+			"guile": 4,
+			"magic": 2
+		},
+		{
+			"name": "Flask",
+			"strength":3,
+			"guile": 4,
+			"magic": 3
+		},
+		{
+			"name": "Keg",
+			"strength":5,
+			"guile": 5,
+			"magic": 5
+		}
+	],
 	"currency": [350, 375, 400, 425, 450, 475, 500, 525, 550, 575, 600, 625, 650]
 }

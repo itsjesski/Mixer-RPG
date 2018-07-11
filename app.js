@@ -1683,8 +1683,13 @@ function rpgPotion(userid) {
 }
 
 
-
+/** @desc Attempts to authenticate and connect to mixer chat
+  * @private
+  * @param {String} [clientId] OAuth client id to use; optional
+*/
 const startChat = () => {
+
+    // create a new SimpleMixerChatClient instance
     chat = new SimpleMixerChatClient();
 
     // catch events
@@ -1698,14 +1703,18 @@ const startChat = () => {
         process.exit(1);
     });
 
-    // start chat
+    // start connection process
     chat.connect()
+
+        // Successful connection
         .then(() => {
 
             // add whatever here to do stuff once connected
 
             chat.broadcast('Mixer RPG is now online');
         })
+
+        // Connection attempt failed
         .catch(err => {
             console.error(err);
             process.exit(1);

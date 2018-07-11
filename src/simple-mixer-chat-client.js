@@ -18,8 +18,10 @@ const dbAuth = new JsonDB("db/auth", true, true);
 class SimpleMixerChatClient extends EventEmitter {
 
     /** @desc Creates a new client instance
-      * @param {String} [clientId] OAuth client id
       * @public
+      * @constructor
+      * @param {String} [clientId] OAuth client id
+
       */
     constructor(clientId) {
         super();
@@ -200,10 +202,10 @@ class SimpleMixerChatClient extends EventEmitter {
     }
 
     /** @desc Sends a whisper if the chat client is connected
+      * @public
       * @param {String} user User to send the whisper
       * @param {String} msg Message to send to the user
       * @throws {Error} Thrown if the chat client is not in a connected state
-      * @public
       */
     whisper(user, msg) {
 
@@ -217,7 +219,9 @@ class SimpleMixerChatClient extends EventEmitter {
     }
 
     /** @desc Sends a message to the channel
+      * @public
       * @param {String} msg Message to send to the channel
+      * @throws {Error} Thrown if the chat client is not in a connected state
       */
     broadcast(msg) {
 
@@ -233,6 +237,7 @@ class SimpleMixerChatClient extends EventEmitter {
 
 /** @desc enumerate of chat-connection states
   * @public
+  * @static
   * @readonly
   * @enum {Number}
   */

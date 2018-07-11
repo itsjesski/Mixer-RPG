@@ -2,14 +2,12 @@
 
 // Requirements
 // These are required node modules.
-const WebSocket = require('ws');
 const JsonDB = require('node-json-db');
 const request = require('request');
-const auth = require('mixer-shortcode-oauth');
-const mixer = require('beam-interactive-node2');
-const mixerClient = require('beam-client-node');
-const Roll = require('roll'),
-    dice = new Roll();
+const Roll = require('roll');
+const dice = new Roll();
+
+const SimpleMixerChatClient = require('./src/simple-mixer-chat-client');
 
 
 // Database Setup (name / save after each push / human readable format).
@@ -22,7 +20,7 @@ let dbMonsters = new JsonDB("db/monsters", true, true);
 let dbGame = new JsonDB("db/game", true, true);
 let dbMissions = new JsonDB("db/missions", true, true);
 
-let socket;
+let chat;
 
 // General Settings
 // Basic app variables used with game.
@@ -54,145 +52,6 @@ let rpgApp = {
     trophyList: dbItems.getData("/trophy"),
     training: dbMissions.getData("/training")
 };
-
-// Authenticate with Mixer using oauth
-// Will print a shortcode out to the terminal
-mixer.setWebSocket(require('ws'));
-if (typeof dbAuth.getData('/clientId') !== 'string') {
-    throw new Error('clientId was not a string');
-}
-const authInfo = {
-    "client_id": dbAuth.getData('/clientId'),
-    "scopes": [
-        "chat:bypass_slowchat",
-        "chat:bypass_links",
-        "chat:bypass_filter",
-        "chat:bypass_catbot",
-        "chat:chat",
-        "chat:connect",
-        "chat:remove_message",
-        "chat:whisper"
-    ]
-};
-const store = new auth.LocalTokenStore(__dirname + '/db/authTokensDoNotShow.json');
-const authClient = new auth.ShortcodeAuthClient(authInfo, store);
-authClient.on('code', code => {
-    console.log(`Go to https://mixer.com/go?code=${code} and enter code ${code}...`);
-});
-
-authClient.on('authorized', (token) => {
-    console.log('Got token!', token);
-    const _instance = new MinimalMixerChatClient({
-        authToken: token.access_token
-    });
-});
-
-authClient.on('expired', () => {
-    console.error('Auth request expired');
-    process.exit(1);
-});
-
-authClient.on('declined', () => {
-    console.error('Auth request declined');
-    process.exit(1);
-});
-
-authClient.on('error', (e) => {
-    console.error('Auth error:', e);
-    process.exit(1);
-});
-
-authClient.doAuth();
-
-//////////////////
-// CONNECT TO CHAT
-
-function createChatSocket (userId, channelId, endpoints, authkey) {
-    console.log('STARTING createChatSocket');
-    socket = new mixerClient.Socket(WebSocket, endpoints).boot();
-
-    // You don't need to wait for the socket to connect before calling
-    // methods. We spool them and run them when connected automatically.
-    socket.auth(channelId, userId, authkey)
-        .then(() => {
-            console.log('You are now authenticated!');
-            // Send a chat message
-            sendBroadcast('Mixer-RPG is now online.');
-
-            // Debug
-            //buyPotion('Firebottle', 53078);
-            //buyMonster('Firebottle', 53078);
-        })
-        .catch(error => {
-            console.error('Oh no! An error occurred.');
-            console.error(error);
-        });
-
-    // Listen for chat messages. Note you will also receive your own!
-    socket.on('ChatMessage', data => {
-        onChatMessage(data);
-    });
-
-    // Listen for socket errors. You will need to handle these here.
-    socket.on('error', error => {
-        console.error('Socket error');
-        console.error(error);
-    });
-}
-
-// Auto and Login
-class MinimalMixerChatClient {
-    constructor(authJson) {
-        let authToken = authJson.authToken;
-        let userInfo;
-        const client = new mixerClient.Client(new mixerClient.DefaultRequestRunner());
-
-        // With OAuth we don't need to log in. The OAuth Provider will attach
-        // the required information to all of our requests after this call.
-        client.use(new mixerClient.OAuthProvider(client, {
-            tokens: {
-                access: authToken,
-                expires: Date.now() + (365 * 24 * 60 * 60 * 1000)
-            }
-        }));
-
-        // Gets the user that the Access Token we provided above belongs to.
-        client.request('GET', 'users/current')
-            .then(response => {
-                // Store the logged in user's details for later reference
-                userInfo = response.body;
-
-                // Returns a promise that resolves with our chat connection details.
-                return new mixerClient.ChatService(client).join(response.body.channel.id);
-            })
-            .then(response => {
-                const body = response.body;
-                return createChatSocket(userInfo.id, userInfo.channel.id, body.endpoints, body.authkey);
-            })
-            .catch(error => {
-                console.error('Something went wrong.');
-                console.error(error);
-            })
-            .then(() => {
-                mixerClientOpened();
-            });
-    }
-
-    mixerClientOpened() {
-        console.log('Mixer client opened');
-
-        // Debug, do something every 15 seconds.
-        // buyMonster("Firebottle", 53078);
-        // rpgAdventure("Firebottle", 53078);
-
-        // CONNECTION OPENED
-    }
-
-    MixerChatClientError(error) {
-        console.error('interactive error: ', error);
-    }
-}
-
 
 
 
@@ -270,7 +129,7 @@ function onChatMessage(data) {
     } else if (dbSettings.getData("/requireWhispers") === false) {
         rpgCommands(username, userid, command, rawcommand, isMod, isStreamer);
     } else {
-        sendWhisper(username, "Please /whisper " + dbSettings.getData('/botName') + " to run commands.");
+        chat.whisper(username, "Please /whisper " + dbSettings.getData('/botName') + " to run commands.");
     }
 }
 
@@ -280,7 +139,7 @@ function rpgCommands(username, userid, command, rawcommand, isMod, isStreamer) {
 
     // Commands outside of cooldown.
     if (command === "!rpg") {
-        sendWhisper(username, "Want to play? Try these commands: " + rpgApp.rpgCommands + ".");
+        chat.whisper(username, "Want to play? Try these commands: " + rpgApp.rpgCommands + ".");
 
     } else if (command === "!rpg-equip") {
         dbPlayerKeeper(userid, username);
@@ -336,16 +195,6 @@ function rpgCommands(username, userid, command, rawcommand, isMod, isStreamer) {
 // Helper Functions
 //////////////////////
 
-// Whisper
-function sendWhisper(username, message) {
-    socket.call('whisper', [username, message]);
-}
-
-// Chat Broadcast
-function sendBroadcast(message) {
-    socket.call('msg', [message]);
-}
-
 // Add Points
 function addPoints(userid, coins) {
     let currentCoins;
@@ -388,7 +237,7 @@ function giveallPoints(coins) {
         addPoints(i, coins);
     }
 
-    sendBroadcast('MixerRPG: Everyone receives ' + coins + ' coins!');
+    chat.broadcast('MixerRPG: Everyone receives ' + coins + ' coins!');
 }
 
 /////////////////////////
@@ -471,38 +320,16 @@ function dbPlayerKeeper(userid, username) {
         // Rebalance Stats
         characterStats(userid);
 
-        sendWhisper(username, "You equipped: " + itemName + ".");
+        chat.whisper(username, "You equipped: " + itemName + ".");
         dbPlayers.delete("/" + userid + "/holding");
     } catch (error) {
-        sendWhisper(username, "You have nothing to equip!");
+        chat.whisper(username, "You have nothing to equip!");
     }
 }
 
 ////////////////////
 // General / Helper
 ///////////////////
-
-/* Commented out as not used(?!?!)
-// Array Shuffler
-// Shuffles an array.
-function shuffle(array) {
-    let currentIndex = array.length, temporaryValue, randomIndex;
-
-    // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-
-    // Pick a remaining element...
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-
-        // And swap it with the current element.
-        temporaryValue = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = temporaryValue;
-    }
-    return array;
-}
-*/
 
 // Millisecond to Human Converter
 // Convers millisconds into a timestamp people can read.
@@ -623,10 +450,10 @@ function buyMonster(username, userid) {
         // Add points to user
         let settings = dbSettings.getData('/adventure');
         addPoints(userid, settings["monsterReward"]);
-        sendBroadcast(username + " defeated a " + monsterName + ". They looted " + settings["monsterReward"] + " coins.");
+        chat.broadcast(username + " defeated a " + monsterName + ". They looted " + settings["monsterReward"] + " coins.");
     } else {
         // Player lost. Points for the points god!
-        sendBroadcast(username + " was defeated by the " + monsterName + "!");
+        chat.broadcast(username + " was defeated by the " + monsterName + "!");
     }
 }
 
@@ -644,7 +471,7 @@ function buyMelee(username, userid, returnItem = false) {
     // Push info to queue
     if (returnItem === false) {
         console.log('MixerRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
-        sendWhisper(username, "You found a weapon: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
+        chat.whisper(username, "You found a weapon: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
 
         // Push to DB
         dbPlayerHolder(userid, "holding", "melee", itemName, strengthStat, guileStat, magicStat);
@@ -668,7 +495,7 @@ function buyRanged(username, userid, returnItem = false) {
     // Push info to queue
     if (returnItem === false) {
         console.log('MixerRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
-        sendWhisper(username, "You found a ranged weapon: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
+        chat.whisper(username, "You found a ranged weapon: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
 
         // Push to DB
         dbPlayerHolder(userid, "holding", "ranged", itemName, strengthStat, guileStat, magicStat);
@@ -691,7 +518,7 @@ function buyMagic(username, userid, returnItem = false) {
     // Push info to queue
     if (returnItem === false) {
         console.log('MixerRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
-        sendWhisper(username, "You learned a spell: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
+        chat.whisper(username, "You learned a spell: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
 
         // Push to DB
         dbPlayerHolder(userid, "holding", "magic", itemName, strengthStat, guileStat, magicStat);
@@ -714,7 +541,7 @@ function buyArmor(username, userid, returnItem = false) {
     // Push info to queue
     if (returnItem === false) {
         console.log('MixerRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
-        sendWhisper(username, "You found armor: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
+        chat.whisper(username, "You found armor: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
 
         // Push to DB
         dbPlayerHolder(userid, "holding", "armor", itemName, strengthStat, guileStat, magicStat);
@@ -737,7 +564,7 @@ function buyMount(username, userid, returnItem = false) {
     // Push info to queue
     if (returnItem === false) {
         console.log('MixerRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
-        sendWhisper(username, "You found a mount: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
+        chat.whisper(username, "You found a mount: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
 
         // Push to DB
         dbPlayerHolder(userid, "holding", "mount", itemName, strengthStat, guileStat, magicStat);
@@ -759,7 +586,7 @@ function buyTitle(username, userid, returnItem = false) {
     // Push info to queue
     if (returnItem === false) {
         console.log('MixerRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
-        sendWhisper(username, "You won a title: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
+        chat.whisper(username, "You won a title: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
 
         // Push to DB
         dbPlayerHolder(userid, "holding", "title", itemName, strengthStat, guileStat, magicStat);
@@ -782,7 +609,7 @@ function buyCompanion(username, userid, returnItem = false) {
     // Push info to queue
     if (returnItem === false) {
         console.log('MixerRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
-        sendWhisper(username, "You found a companion: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
+        chat.whisper(username, "You found a companion: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
 
         // Push to DB
         dbPlayerHolder(userid, "holding", "companion", itemName, strengthStat, guileStat, magicStat);
@@ -798,7 +625,7 @@ function buyCoins(username, userid) {
 
     // Push info to queue
     console.log('MixerRPG: ' + username + ' got ' + coins + ' coins.');
-    sendWhisper(username, "You found " + coins + " coins!");
+    chat.whisper(username, "You found " + coins + " coins!");
 
     // Add points to user in scottybot
     addPoints(userid, coins);
@@ -816,7 +643,7 @@ function buyTrophy(username, streamerName, userid, returnItem = false) {
     // Push info to queue
     if (returnItem === false) {
         console.log('MixerRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
-        sendWhisper(username, "You found a trophy: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
+        chat.whisper(username, "You found a trophy: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
 
         // Push to DB
         dbPlayerHolder(userid, "holding", "trophy", itemName, strengthStat, guileStat, magicStat);
@@ -839,7 +666,7 @@ function buyPotion(username, userid, returnItem = false) {
     // Push info to queue
     if (returnItem === false) {
         console.log('MixerRPG: ' + username + ' got a ' + itemName + ' (' + strengthStat + '/' + guileStat + '/' + magicStat + ').');
-        sendWhisper(username, "You found a potion: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
+        chat.whisper(username, "You found a potion: " + itemName + " (" + strengthStat + "/" + guileStat + "/" + magicStat + "). Type !rpg-equip to use it or !rpg-sell to sell it.");
 
         // Push to DB
         dbPlayerHolder(userid, "holding", "potion", itemName, strengthStat, guileStat, magicStat);
@@ -1018,8 +845,8 @@ function rpgInventory(username, userid) {
 
     let sayInventory1 = username + " the " + title + " " + titleStats + " || Coins: " + coins + " || Melee: " + melee + " " + meleeStats + " || Ranged: " + ranged + " " + rangedStats + " || Magic: " + magicName + " " + magicStats + " || Armor: " + armor + " " + armorStats;
     let sayInventory2 = "Mount: " + mount + " " + mountStats + " || Companion: " + companion + " " + companionStats + " || Trophy: " + trophy + " " + trophyStats + " || Potion: " + potionName + " " + potionStats + " || Prowess: " + prowessStats + " || Total: " + charStats;
-    sendWhisper(username, sayInventory1);
-    sendWhisper(username, sayInventory2);
+    chat.whisper(username, sayInventory1);
+    chat.whisper(username, sayInventory2);
 }
 
 ///////////////////////////
@@ -1212,12 +1039,12 @@ function rpgCombat(userOne, userTwo, diceToRoll) {
 
     // Send whisper to player one if they're a person.
     if (personOne.userid != null) {
-        sendWhisper(personOneName, "Combat Results: " + personOneName + " (" + personOneStrength + "/" + personOneGuile + "/" + personOneMagic + ") won " + personOneWin + " times. vs " + personTwoName + " (" + personTwoStrength + "/" + personTwoGuile + "/" + personTwoMagic + ") won " + personTwoWin + " times.");
+        chat.whisper(personOneName, "Combat Results: " + personOneName + " (" + personOneStrength + "/" + personOneGuile + "/" + personOneMagic + ") won " + personOneWin + " times. vs " + personTwoName + " (" + personTwoStrength + "/" + personTwoGuile + "/" + personTwoMagic + ") won " + personTwoWin + " times.");
     }
 
     // Send whisper to player two if they're a person.
     if (personTwo.userid != null) {
-        sendWhisper(personTwoName, "Combat Results: " + personOneName + " (" + personOneStrength + "/" + personOneGuile + "/" + personOneMagic + ") won " + personOneWin + " times. vs " + personTwoName + " (" + personTwoStrength + "/" + personTwoGuile + "/" + personTwoMagic + ") won " + personTwoWin + " times.");
+        chat.whisper(personTwoName, "Combat Results: " + personOneName + " (" + personOneStrength + "/" + personOneGuile + "/" + personOneMagic + ") won " + personOneWin + " times. vs " + personTwoName + " (" + personTwoStrength + "/" + personTwoGuile + "/" + personTwoMagic + ") won " + personTwoWin + " times.");
     }
 
     // Return battle results to main functions for payouts, etc...
@@ -1274,7 +1101,7 @@ function rpgAdventure(username, userid) {
 
         deletePoints(userid, settings.cost);
     } else {
-        sendWhisper(username, 'You do not have enough coins for this, or adventure is deactivated.');
+        chat.whisper(username, 'You do not have enough coins for this, or adventure is deactivated.');
     }
 }
 
@@ -1296,9 +1123,9 @@ function rpgDailyQuest(username, userid) {
     if (timeSinceLastDaily >= 86400000) {
         dbPlayers.push("/" + userid + "/lastSeen/dailyQuest", date);
         addPoints(userid, dailyReward);
-        sendWhisper(username, "Daily completed! Reward: " + dailyReward + " || Cooldown: 24hr");
+        chat.whisper(username, "Daily completed! Reward: " + dailyReward + " || Cooldown: 24hr");
     } else {
-        sendWhisper(username, "You already completed your daily! Try again in " + humanTime + ".");
+        chat.whisper(username, "You already completed your daily! Try again in " + humanTime + ".");
     }
 }
 
@@ -1315,7 +1142,7 @@ function rpgRaidEvent(username, userid, rawcommand, isMod) {
             if (!error && response.statusCode === 200) {
 
                 // Great, valid raid target. Get target info, set raid to active, send broadcast to overlay with info.
-                sendBroadcast(username + " has started a raid! Type !rpg-raid to join!");
+                chat.broadcast(username + " has started a raid! Type !rpg-raid to join!");
                 rpgApp.raidActive = true;
 
                 // Start timer for raid event based on setting in settings db.
@@ -1333,17 +1160,17 @@ function rpgRaidEvent(username, userid, rawcommand, isMod) {
                         buyTrophy(luckyPersonName, raidTarget, luckyPerson.userid);
                         let raidWinCoin = dbSettings.getData("/raid/winReward");
                         giveallPoints(raidWinCoin);
-                        sendBroadcast("The raid has ended. The horde has overcome " + raidTarget + " and " + luckyPersonName + " took a trophy. Everyone also gets " + raidWinCoin + " coins!");
-                        sendWhisper(luckyPersonName, "You got a trophy! Type !rpg-equip to use it!");
+                        chat.broadcast("The raid has ended. The horde has overcome " + raidTarget + " and " + luckyPersonName + " took a trophy. Everyone also gets " + raidWinCoin + " coins!");
+                        chat.whisper(luckyPersonName, "You got a trophy! Type !rpg-equip to use it!");
                     } else {
                         let raidLoseCoin = dbSettings.getData("/raid/loseReward");
                         giveallPoints(raidLoseCoin);
-                        sendBroadcast("The raid has ended. " + raidTarget + " has fought off the horde. Everyone gets " + raidLoseCoin + " coins for your repair bill.");
+                        chat.broadcast("The raid has ended. " + raidTarget + " has fought off the horde. Everyone gets " + raidLoseCoin + " coins for your repair bill.");
                     }
 
                     // Get raid message and send that to chat when everything is over.
                     let raidMessage = dbSettings.getData("/raid/raidMessage");
-                    sendBroadcast(raidMessage + " || https://mixer.com/" + raidTarget);
+                    chat.broadcast(raidMessage + " || https://mixer.com/" + raidTarget);
 
                     // Reset lists and flags
                     rpgApp.raidActive = false;
@@ -1352,7 +1179,7 @@ function rpgRaidEvent(username, userid, rawcommand, isMod) {
                 }, rpgApp.raidTimer);
 
             } else {
-                sendWhisper(username, "Error: " + raidTarget + " is not a valid raid target!");
+                chat.whisper(username, "Error: " + raidTarget + " is not a valid raid target!");
             }
         });
 
@@ -1364,13 +1191,13 @@ function rpgRaidEvent(username, userid, rawcommand, isMod) {
                 "name": username,
                 "userid": userid
             });
-            sendWhisper(username, "You've joined the raid!");
+            chat.whisper(username, "You've joined the raid!");
         } else {
-            sendWhisper(username, "You've already joined the raid!");
+            chat.whisper(username, "You've already joined the raid!");
         }
     } else {
         // No raid is active
-        sendWhisper(username, "There is currently not an active raid.");
+        chat.whisper(username, "There is currently not an active raid.");
     }
 }
 
@@ -1381,7 +1208,7 @@ function rpgCompanionDuel(username, userid, rawcommand) {
     // Stop if duels are off.
     let isAllowed = dbSettings.getData("/companionDuel/active");
     if (!isAllowed) {
-        sendWhisper(username, "This command is currently deactivated.");
+        chat.whisper(username, "This command is currently deactivated.");
         return;
     }
 
@@ -1415,13 +1242,13 @@ function rpgCompanionDuel(username, userid, rawcommand) {
 
     // If this happens it means no duel is running and the person tried !rpg BLAHBLAH (without numbers for a bet)
     if (!inProgress && isNaN(pointsBet)) {
-        sendWhisper(username, "Please use numbers when trying to place a bet.");
+        chat.whisper(username, "Please use numbers when trying to place a bet.");
         return;
     }
 
     // Make sure the bet is over the minimum.
     if (pointsBet < minimumBet) {
-        sendWhisper(username, "The minimum bet is: " + minimumBet);
+        chat.whisper(username, "The minimum bet is: " + minimumBet);
         return;
     }
 
@@ -1433,7 +1260,7 @@ function rpgCompanionDuel(username, userid, rawcommand) {
 
         // Stop here if the user doesnt have enough money to cover the bet.
         if (currentPoints < pointsBet) {
-            sendWhisper(username, "You don't have enough money to enter this duel.");
+            chat.whisper(username, "You don't have enough money to enter this duel.");
             return;
         }
 
@@ -1444,7 +1271,7 @@ function rpgCompanionDuel(username, userid, rawcommand) {
 
         // Only let people will companions enter the battle.
         if (playerTwoProfile.equipment.companion == null) {
-            sendWhisper(username, "You need a companion to enter an arena battle!");
+            chat.whisper(username, "You need a companion to enter an arena battle!");
             return;
         }
 
@@ -1478,7 +1305,7 @@ function rpgCompanionDuel(username, userid, rawcommand) {
             addPoints(playerOne, winnings);
         }
 
-        sendBroadcast(combatResults + ' has won the arena battle! Their team wins ' + winnings + ' coins.');
+        chat.broadcast(combatResults + ' has won the arena battle! Their team wins ' + winnings + ' coins.');
 
         // Reset Game
         dbGame.delete("/companionDuel");
@@ -1488,13 +1315,13 @@ function rpgCompanionDuel(username, userid, rawcommand) {
 
         // Only let people will companions enter the battle.
         if (playerProfile.equipment.companion === null || playerProfile.equipment.companion === undefined) {
-            sendWhisper(username, "You need a companion to start an arena battle!");
+            chat.whisper(username, "You need a companion to start an arena battle!");
             return;
         }
 
         // Stop here if person doesnt have enough coins.
         if (playerProfile.coins < pointsBet) {
-            sendWhisper(username, "You do not have enough coins for this battle.");
+            chat.whisper(username, "You do not have enough coins for this battle.");
             return;
         }
 
@@ -1504,7 +1331,7 @@ function rpgCompanionDuel(username, userid, rawcommand) {
         dbGame.push("/companionDuel/settings/inProgress", true);
 
         // Broadcast that a duelist is waiting for a challenger.
-        sendBroadcast(playerProfile.username + " has bet " + pointsBet + " coins on a companion battle. Type !rpg-arena to accept the challenge. Expires: 30 sec.");
+        chat.broadcast(playerProfile.username + " has bet " + pointsBet + " coins on a companion battle. Type !rpg-arena to accept the challenge. Expires: 30 sec.");
     }
 }
 
@@ -1515,7 +1342,7 @@ function rpgPlayerDuel(username, userid, rawcommand) {
     // Stop if duels are off.
     let isAllowed = dbSettings.getData("/playerDuel/active");
     if (!isAllowed) {
-        sendWhisper(username, "This command is currently deactivated.");
+        chat.whisper(username, "This command is currently deactivated.");
         return;
     }
 
@@ -1549,13 +1376,13 @@ function rpgPlayerDuel(username, userid, rawcommand) {
 
     // If this happens it means no duel is running and the person tried !rpg BLAHBLAH (without numbers for a bet)
     if (!inProgress && isNaN(pointsBet)) {
-        sendWhisper(username, "Please use numbers when trying to place a bet.");
+        chat.whisper(username, "Please use numbers when trying to place a bet.");
         return;
     }
 
     // Make sure the bet is over the minimum.
     if (pointsBet < minimumBet) {
-        sendWhisper(username, "The minimum bet is: " + minimumBet);
+        chat.whisper(username, "The minimum bet is: " + minimumBet);
         return;
     }
 
@@ -1567,7 +1394,7 @@ function rpgPlayerDuel(username, userid, rawcommand) {
 
         // Stop here if the user doesnt have enough money to cover the bet.
         if (currentPoints < pointsBet) {
-            sendWhisper(username, "You don't have enough money to enter this duel.");
+            chat.whisper(username, "You don't have enough money to enter this duel.");
             return;
         }
 
@@ -1603,7 +1430,7 @@ function rpgPlayerDuel(username, userid, rawcommand) {
             addPoints(playerOne, winnings);
         }
 
-        sendBroadcast(combatResults + ' has won the duel! They win ' + winnings + ' coins.');
+        chat.broadcast(combatResults + ' has won the duel! They win ' + winnings + ' coins.');
 
         // Reset Game
         dbGame.delete("/playerDuel");
@@ -1613,7 +1440,7 @@ function rpgPlayerDuel(username, userid, rawcommand) {
 
         // Stop here if person doesnt have enough coins.
         if (playerProfile.coins < pointsBet) {
-            sendWhisper(username, "You do not have enough coins for this battle.");
+            chat.whisper(username, "You do not have enough coins for this battle.");
             return;
         }
 
@@ -1623,7 +1450,7 @@ function rpgPlayerDuel(username, userid, rawcommand) {
         dbGame.push("/playerDuel/settings/inProgress", true);
 
         // Broadcast that a duelist is waiting for a challenger.
-        sendBroadcast(playerProfile.username + " has bet " + pointsBet + " coins on a duel. Type !rpg-duel to accept the challenge. Expires: 30 sec.");
+        chat.broadcast(playerProfile.username + " has bet " + pointsBet + " coins on a duel. Type !rpg-duel to accept the challenge. Expires: 30 sec.");
     }
 }
 
@@ -1649,15 +1476,15 @@ function rpgRefreshShop(username, userid, isStreamer) {
                     dbGame.push("/shop/item" + i + "/slot", item.itemslot);
                 }
 
-                sendBroadcast('A new travelling salesman has come to town! Type !rpg-shop to see his supply.');
+                chat.broadcast('A new travelling salesman has come to town! Type !rpg-shop to see his supply.');
                 deletePoints(userid, settings.cost);
             } else {
                 console.log('Could not access mixer api for store item generation.');
-                sendWhisper(username, "Something went wrong when refreshing the shop.");
+                chat.whisper(username, "Something went wrong when refreshing the shop.");
             }
         });
     } else {
-        sendWhisper(username, "You dont not have enough coins to refresh the shop or it is turned off.");
+        chat.whisper(username, "You dont not have enough coins to refresh the shop or it is turned off.");
     }
 }
 function rpgShopGeneration(trophyName) {
@@ -1720,7 +1547,7 @@ function rpgShopPurchase(username, userid, rawcommand) {
 
             if (pointsTotal >= item.price && isNaN(item.price) === false) {
                 // Item Bought
-                sendWhisper(username, "You bought " + item.itemName + " for " + item.price + " coins. Type !rpg-equip to use it or !rpg-sell to sell it.");
+                chat.whisper(username, "You bought " + item.itemName + " for " + item.price + " coins. Type !rpg-equip to use it or !rpg-sell to sell it.");
                 deletePoints(userid, item.price);
                 dbGame.push("/shop/item" + command + "/price", "sold");
 
@@ -1728,10 +1555,10 @@ function rpgShopPurchase(username, userid, rawcommand) {
                 dbPlayerHolder(userid, "holding", item.slot, item.itemName, item.strength, item.guile, item.magic);
             } else {
                 // Not enough points.
-                sendWhisper(username, "You do not have enough coins for that item!");
+                chat.whisper(username, "You do not have enough coins for that item!");
             }
         } else {
-            sendWhisper(username, "We are out of stock on that item.");
+            chat.whisper(username, "We are out of stock on that item.");
         }
 
     } else {
@@ -1740,7 +1567,7 @@ function rpgShopPurchase(username, userid, rawcommand) {
         let itemTwo = dbGame.getData("/shop/item2");
         let itemThree = dbGame.getData("/shop/item3");
 
-        sendWhisper(username, "[1 - cost: " + itemOne.price + "] " + itemOne.itemName + "(" + itemOne.slot + ": " + itemOne.strength + "/" + itemOne.guile + "/" + itemOne.magic + "), [2 - cost: " + itemTwo.price + "] " + itemTwo.itemName + "(" + itemTwo.slot + ": " + itemTwo.strength + "/" + itemTwo.guile + "/" + itemTwo.magic + "), [3 - cost: " + itemThree.price + "] " + itemThree.itemName + "(" + itemThree.slot + ": " + itemThree.strength + "/" + itemThree.guile + "/" + itemThree.magic + ")");
+        chat.whisper(username, "[1 - cost: " + itemOne.price + "] " + itemOne.itemName + "(" + itemOne.slot + ": " + itemOne.strength + "/" + itemOne.guile + "/" + itemOne.magic + "), [2 - cost: " + itemTwo.price + "] " + itemTwo.itemName + "(" + itemTwo.slot + ": " + itemTwo.strength + "/" + itemTwo.guile + "/" + itemTwo.magic + "), [3 - cost: " + itemThree.price + "] " + itemThree.itemName + "(" + itemThree.slot + ": " + itemThree.strength + "/" + itemThree.guile + "/" + itemThree.magic + ")");
     }
 }
 
@@ -1757,7 +1584,7 @@ function rpgTraining(username, userid) {
         currentCoin = dbPlayers.getData('/' + userid + '/coins');
         trainingSettings = dbSettings.getData('/training');
     } catch (err) {
-        sendWhisper('username', "Couldn't find your coin amount. Have you done !rpg-daily yet?");
+        chat.whisper('username', "Couldn't find your coin amount. Have you done !rpg-daily yet?");
         return;
     }
 
@@ -1803,10 +1630,10 @@ function rpgTraining(username, userid) {
 
         // Send a whisper about what happened.
         missionText = `${missionText} || Prowess:(${missionStrength}/${missionGuile}/${missionMagic}) || ${missionCoin} coins.`;
-        sendWhisper(username, missionText);
+        chat.whisper(username, missionText);
         deletePoints(userid, trainingSettings.cost);
     } else {
-        sendWhisper(username, "You do not have enough coins to train, or training is turned off.");
+        chat.whisper(username, "You do not have enough coins to train, or training is turned off.");
     }
 }
 
@@ -1825,9 +1652,9 @@ function rpgSell(userid) {
         let holdingName = player.holding.name;
         dbPlayers.delete('/' + userid + '/holding');
         addPoints(userid, sellPrice);
-        sendWhisper(player.username, 'You have sold a ' + holdingName + ' for ' + sellPrice + ' coins.');
+        chat.whisper(player.username, 'You have sold a ' + holdingName + ' for ' + sellPrice + ' coins.');
     } else {
-        sendWhisper(player.username, 'You aren\'t holding any items, so you have nothing to sell.');
+        chat.whisper(player.username, 'You aren\'t holding any items, so you have nothing to sell.');
     }
 }
 
@@ -1842,30 +1669,46 @@ function rpgPotion(userid) {
     }
 
     if (player.backpack === null || player.backpack === undefined) {
-        sendWhisper(player.username, 'You have nothing in your backpack to drink!');
+        chat.whisper(player.username, 'You have nothing in your backpack to drink!');
         return;
     }
 
     // Set used to true if the person drank a potion.
     if (player.backpack.potion != null) {
         dbPlayers.push('/' + userid + '/backpack/potion/used', true);
-        sendWhisper(player.username, 'You chug the potion. The stats will be added to your next combat.');
+        chat.whisper(player.username, 'You chug the potion. The stats will be added to your next combat.');
     } else {
-        sendWhisper(player.username, 'You drink some air.');
+        chat.whisper(player.username, 'You drink some air.');
     }
 }
 
 
-/**
-function fixer(){
-	var obj = dbPlayers.getData('/');
-	Object.keys(obj).forEach(function(key) {
-		let player = obj[key];
-		console.log('Fixing '+player.username+'.');
-		buyPotion(player.username, key);
-	});
-}
-setTimeout(function(){
-	fixer();
-}, 10000);
-*/
+
+const startChat = () => {
+    chat = new SimpleMixerChatClient();
+
+    // catch events
+    chat.on('chatmessage', onChatMessage);
+    chat.on('error', (err) => {
+        console.error(err);
+
+        /* TODO: Use timer to attempt reconnect instead of exiting process
+        startChat();
+        */
+        process.exit(1);
+    });
+
+    // start chat
+    chat.connect()
+        .then(() => {
+
+            // add whatever here to do stuff once connected
+
+            chat.broadcast('Mixer RPG is now online');
+        })
+        .catch(err => {
+            console.error(err);
+            process.exit(1);
+        });
+};
+startChat();

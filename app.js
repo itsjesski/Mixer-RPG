@@ -26,7 +26,7 @@ let chat;
 // General Settings
 // Basic app variables used with game.
 let rpgApp = {
-    chanID: dbAuth.getData("/channelID"),
+    chanID: dbAuth.getData("/channelId"),
     rpgCommands: "!rpg-inventory, !rpg-daily, !rpg-adventure (cost: " + dbSettings.getData('/adventure/cost') + "), !rpg-training (cost: " + dbSettings.getData('/training/cost') + ") !rpg-arena (bet), !rpg-duel (bet), !rpg-shop, !rpg-shop-refresh (cost: " + dbSettings.getData('/shop-refresh/cost') + "), !rpg-sell",
     raidTimer: dbSettings.getData("/raid/timer"),
     cmdCooldownActive: false,

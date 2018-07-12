@@ -41,8 +41,29 @@ class SimpleMixerChatClient extends EventEmitter {
             }
         }
 
+        // attempt to get channelId
+        let channelId;
+        try {
+            channelId = dbAuth.getData('/channelId');
+
+        // Check: error is NOT the result of channelId not being defined in database
+        } catch (err) {
+            console.log(err.message);
+            if (!/^Can't find dataPath:/.test(err.message)) {
+                throw err;
+            }
+        }
+
+        // validate channel ID;
+        if (channelId != null && isNaN(channelId)) {
+            throw new TypeError('invalid channel id');
+        }
+
         // Store client id
         this.clientId = clientId;
+
+        // Store ChannelId
+        this.channelId = channelId;
 
         // Store state
         this.state = SimpleMixerChatClient.states.INITIALIZED;
@@ -137,8 +158,12 @@ class SimpleMixerChatClient extends EventEmitter {
             // store user info
             self.userInfo = user.body;
 
+            if (self.channelId == null) {
+                self.channelId = self.userInfo.channel.id;
+            }
+
             // Get authkey for the currently authed user's channel chat
-            return new mixerClient.ChatService(self.client).join(self.userInfo.channel.id);
+            return new mixerClient.ChatService(self.client).join(self.channelId);
 
         // Auth key retrieved
         }).then(chatInfo => {
@@ -183,7 +208,7 @@ class SimpleMixerChatClient extends EventEmitter {
             self.state = SimpleMixerChatClient.states.CONNECTING;
 
             // Start connection attempt
-            return self.socket.auth(self.userInfo.channel.id, self.userInfo.id, chatInfo.authkey);
+            return self.socket.auth(self.channelId, self.userInfo.id, chatInfo.authkey);
 
         // Connected successfully
         }).then(() => {

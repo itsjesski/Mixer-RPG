@@ -1,14 +1,15 @@
 'use strict';
 
-// Requirements
-// These are required node modules.
+// Dep modules
 const JsonDB = require('node-json-db');
 const request = require('request');
 const Roll = require('roll');
-const dice = new Roll();
 
+// Custom modules
 const SimpleMixerChatClient = require('./src/simple-mixer-chat-client');
 
+
+const dice = new Roll();
 
 // Database Setup (name / save after each push / human readable format).
 // This makes sure these database files exist.
@@ -59,19 +60,11 @@ let rpgApp = {
 // Command Center
 ///////////////////////////////
 
-function getRawChatMessage(chatEvent) {
-    let rawMessage = "";
-    chatEvent.message.message.forEach(m => {
-        rawMessage += m.text;
-    });
-    return rawMessage;
-}
-
 // Parses a message for commands.
 function checkForCommand(chatEvent) {
 
     // Get raw chat message.
-    let normalizedRawMessage = getRawChatMessage(chatEvent).toLowerCase();
+    let normalizedRawMessage = chatEvent.message.raw;
 
     let allCommands = [
         "!rpg",
@@ -94,7 +87,7 @@ function checkForCommand(chatEvent) {
         // this prevents the "!rpg" command from always returning for all commands
         let regex = new RegExp("^" + command + "(?:\\s|$)");
         if (regex.test(normalizedRawMessage)) {
-            console.log('--------------------COMMAND USED-------------------');
+            console.log('COMMAND USED: ', command);
             return command;
         }
     }
@@ -109,9 +102,6 @@ function onChatMessage(data) {
     if (command == null) {
         return;
     }
-    /* Commented out because not used(?!)
-    let cmdtype = data.event;
-    */
 
     let username = data['user_name'];
     let userid = data["user_id"];
@@ -120,14 +110,16 @@ function onChatMessage(data) {
     let userRoles = data['user_roles'];
     let isStreamer = userRoles.includes("Owner") ? true : false;
     let isMod = userRoles.includes("Mod") || isStreamer ? true : false;
-    let rawcommand = getRawChatMessage(data);
+    let rawcommand = data.message.raw;
 
     console.log("MixerRPG: " + username + " used command \"" + command + "\".");
 
     if (dbSettings.getData("/requireWhispers") === true && whisper === true) {
         rpgCommands(username, userid, command, rawcommand, isMod, isStreamer);
+
     } else if (dbSettings.getData("/requireWhispers") === false) {
         rpgCommands(username, userid, command, rawcommand, isMod, isStreamer);
+
     } else {
         chat.whisper(username, "Please /whisper " + dbSettings.getData('/botName') + " to run commands.");
     }
@@ -451,6 +443,7 @@ function buyMonster(username, userid) {
         let settings = dbSettings.getData('/adventure');
         addPoints(userid, settings["monsterReward"]);
         chat.broadcast(username + " defeated a " + monsterName + ". They looted " + settings["monsterReward"] + " coins.");
+
     } else {
         // Player lost. Points for the points god!
         chat.broadcast(username + " was defeated by the " + monsterName + "!");

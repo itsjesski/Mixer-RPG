@@ -155,6 +155,11 @@ class SimpleMixerChatClient extends EventEmitter {
             // Wire up mixer-chat instance
             self.socket.on('ChatMessage', data => {
 
+                // rebuild the raw message
+                data.message.raw = data.message.message.reduce((acc, val) => {
+                    return acc + val.text;
+                }, '');
+
                 // Emit chat message
                 self.emit('ChatMessage', data);
             });

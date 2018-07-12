@@ -806,7 +806,6 @@ function rpgInventory(username, userid) {
         potionName = potion + " : " + potionUsed;
         potionStats = "(" + strength + "/" + guile + "/" + magic + ")";
     } catch (error) {
-        console.log(error);
         potionName = "None";
         potionStats = "(0/0/0)";
     }
@@ -1693,7 +1692,8 @@ const startChat = () => {
     chat = new SimpleMixerChatClient();
 
     // catch events
-    chat.on('chatmessage', onChatMessage);
+    chat.on('ChatMessage', onChatMessage);
+
     chat.on('error', (err) => {
         console.error(err);
 

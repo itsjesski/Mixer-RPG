@@ -1,6 +1,7 @@
 'use strict';
 
 // Native modules
+const path = require('path');
 const EventEmitter = require('events').EventEmitter;
 
 // Dep modules
@@ -8,6 +9,8 @@ const JsonDB = require('node-json-db');
 const WebSocket = require('ws');
 const auth = require('mixer-shortcode-oauth');
 const mixerClient = require('beam-client-node');
+
+
 
 const dbAuth = new JsonDB("db/auth", true, true);
 
@@ -73,7 +76,7 @@ class SimpleMixerChatClient extends EventEmitter {
                     "chat:whisper"
                 ]
             },
-            new auth.LocalTokenStore(__dirname + '/db/authTokensDoNotShow.json')
+            new auth.LocalTokenStore(path.join(__dirname, '../db/authTokensDoNotShow.json'))
         );
 
         return new Promise((resolve, reject) => {
@@ -114,14 +117,16 @@ class SimpleMixerChatClient extends EventEmitter {
 
             // Add oauth provider for the client to use
             self.client.use(new mixerClient.OAuthProvider(self.client, {
+                clientId: self.clientId,
                 tokens: {
-                    access: token,
-                    expres: Date.now() + (365 * 24 * 60 * 60 * 1000)
+                    access: token.access_token,
+                    refresh: token.refrsh_token,
+                    expires: token.expires_at
                 }
             }));
 
             // update state
-            self.state = SimpleMixerChatClient.States.CHATLOOKUP;
+            self.state = SimpleMixerChatClient.states.CHATLOOKUP;
 
             // Start request process to get info on the currently authorized user
             return self.client.request('GET', 'users/current');
@@ -180,6 +185,8 @@ class SimpleMixerChatClient extends EventEmitter {
 
             // Update state
             self.state = SimpleMixerChatClient.states.CONNECTED;
+
+            console.log('Connected to mixer chat');
 
             // resolve promise with the SimpleMixerChatClient instance
             return Promise.resolve(self);
